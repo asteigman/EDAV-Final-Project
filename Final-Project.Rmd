@@ -32,7 +32,19 @@ An alarming number of doctors have been caught for inappropriate opiod prescript
 
 ## II. Data Sources
 
+Our data source is the National Survey on Drug Use and Health from 2013. The primary investigators were the United States Department of Health and Human Services, the Substance Abuse and Mental Health Services Administration, and the Center for Behavioral Health Statistics and Quality. This survey has been conducted perioidically since 1971 and has transitioned from a traditional paper-pencil method to a computer-assisted interviewing method. It combines computer-assisted personal interviewing and computer-assisted self-interviewing. It is a highly private and confidential system in order to encourage participant honesty regarding these sensitive behaviors.
+
+The demographic population is "the civilian, noninstituitionalized population of the United States ... who were 12 years of age or older at the time of the survey." Since 2002, NSDUH respondents have been incentivized with a $30 reward for taking the survey, and an improvement in the survey response rate was noted afterwards. This increase in response rate may also be tied to better public awareness about these critical issues.  ** SHOULD TRY TO LOOK FOR MORE CONCRETE INFO ON HOW THE SURVEY IS SENT OUT **
+
+source: https://www.icpsr.umich.edu/icpsrweb/NAHDAP/studies/35509/documentation#
+
+The dataset itself contains a myriad of informaition about the use of drugs, alcohol, and tobacco. It also covers mental and physical illnesses, population demographics, criminal activities, and more.  The target demographic is members of US households, age 12 and older.
+
+As we are working with survey data, we will make sure to be aware of all the possible challenges that may come with this (for example, making sure that "missing" values are actually "missing" and are not logically "no." We are checking this by going back to earlier survey sections to see how participants earlier responses may have caused parts of the survey to be skipped).
+
 ## III. Data Transformation
+
+We imported our data as a .rda file, which added a new challenge because loading and accessing the data was different than with the previous file types we have worked with. 
 
 ## IV. Missing Values
 

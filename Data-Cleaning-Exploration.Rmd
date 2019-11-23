@@ -1,0 +1,58 @@
+---
+title: "Drug Data Cleaning & Exploration"
+author: "Suman Tripathy, Amanda Steigman"
+date: "11/23/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+load("35509-0001-Data.rda")
+drug_study <- da35509.0001
+```
+
+```{r 5load}
+# Examine the overall survey demographic
+summary(drug_study$IRSEX)
+summary(drug_study$AGE2)
+summary(drug_study$INCOME)
+summary(drug_study$EDUCCAT2)
+summary(drug_study$NEWRACE2)
+
+# Proportion of Oxycontin users in data
+drug_study$OXYEVER <- ifelse(drug_study$OXYFLAG == "(1) Ever Used (IROXYRC = 1-3)","yes","no")
+print(sum(drug_study$OXYEVER=="yes")/nrow(drug_study))
+```
+
+```{r 5b}
+# clean data for graph
+drug_study_sub <- drug_study[drug_study$OXYEVER=="yes",]
+drug_study_sub$Sex <- ifelse(drug_study_sub$IRSEX == "(1) Male","Male","Female")
+drug_study_sub$INCOME <- as.character(drug_study_sub$INCOME)
+
+for (i in 1:nrow(drug_study_sub)) {
+  if (drug_study_sub$INCOME[i]=="(1) Less than $20,000") {
+    drug_study_sub$INCOME[i] = "<$20,000"
+  }
+  else if (drug_study_sub$INCOME[i]=="(2) $20,000 - $49,999") {
+    drug_study_sub$INCOME[i] = "$20,000 - $49,999"
+  }
+  else if (drug_study_sub$INCOME[i] == "(3) $50,000 - $74,999") {
+    drug_study_sub$INCOME[i] = "$50,000 - $74,999"
+  }
+  else if (drug_study_sub$INCOME[i] == "(4) $75,000 or More") {
+    drug_study_sub$INCOME[i] = ">$75,000"
+  }
+}
+drug_study_sub$Sex <- as.factor(drug_study_sub$Sex)
+drug_study_sub$Income_Brackets <- as.factor(drug_study_sub$INCOME)
+drug_study_sub$Income <- fct_relevel(drug_study_sub$Income_Brackets,">$75,000",after=3)
+mosaic(Income ~ Sex,
+       data = drug_study_sub, 
+       direction = c("v", "h"),
+       labeling_args = list(rot_labels = c(0, 0, 0, 0), offset_varnames = c(left = 6), offset_labels = c(left = 2.6)),
+       main = "Sex and Income of Oxycontin Users")
+```
