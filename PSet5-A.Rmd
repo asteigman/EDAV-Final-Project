@@ -1,0 +1,181 @@
+---
+title: "EDAV Fall 2019 PSet 5, part A"
+author: "Suman Tripathy, Amanda Steigman"
+output:
+  html_document:
+    df_print: paged
+---
+```{r, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo = TRUE)
+library(ggplot2)
+library(vcd)
+library(forcats)
+library(scales)
+library(dplyr)
+library(plyr)
+
+```
+
+This assignment is designed to help you get started on the final project. Be sure to review the final project instructions (https://edav.info/project.html), in particular the new section on reproducible workflow (https://edav.info/project.html#reproducible-workflow), which summarizes principles that we've discussed in class.
+    
+### 1. The Team
+
+[2 points]
+
+a) Who's on the team? (Include names and UNIs)
+
+Amanda Steigman - as5937
+Suman Tripathy - st3275
+
+
+b) How do you plan to divide up the work? (Grading is on a group basis. The point of asking is to encourage you to think about this.)
+
+Both members will do half the writing and results. Amanda will focus more on the cleaning/mising values of the data as she works with survey data frequently. Suman will take the lead on the interactive component since she has a stronger programming background. Regardless though, we'll comb through one another's code to understand and verify everything with a second set of eyes.
+
+
+### 2. The Questions
+
+[6 points]
+
+List three questions that you hope you will be able to answer from your research.
+
+
+While this study asks about all major drugs, we wanted to hone in on opioids. Since Oxycontin is a commonly prescribed opioid by doctors (usually prescribed to be taken for a shorter period of time, such as right after a surgery), and it can be legally obtained (versus heroin, which is illegal under all circumstances), we thought it would be an interesting focus of our study. [Hydrocodone is also included in the study but fewer questions are asked about how respondents are using it.]
+
+a) What are the interesting relationships between Oxycontin abuse and different demographics? [We additionally have a wealth of demographic information: age, gender, race, education, and income. We plan to investigate trends between Oxycontin usage and a respondent's background, and will narrow our results, and possibly further research questions, based on this. After this assignment, it seems that our main demographic of focus, other than age, will be income.]
+
+b) What particular difficulties do youths who abuse Oxycontin face? [We have the age at which a respondent first used the drug, and there is also a specific section in the survey that only youths ages 12-17 are asked.  We are interested in how the difficulties that youth face - mental health, home life, social support, extracurriculars, access to prevention programs, etc. - may be correlated with increased drug usage.]
+
+c) Is there a relationship between Oxycontin use/abuse and crime? [The dataset holds information about a person's arrests, thefts, violent offenses, DUIs, possession arrests, and more. Moreover, there are often relationships between income, education, and criminal activity, which will add interesting layers and further depth to our exploration of Oxycontin use, demographic, and crime.]
+
+
+### 3. Which output format do you plan to use to submit the project? 
+
+[2 points]
+
+(You don't have to use the same format for this assignment -- PSet 5, part A -- and the final project itself.)
+
+Choices are:
+
+pdf_document  
+
+html_document  
+
+bookdown book: https://bookdown.org/yihui/bookdown/
+
+shiny app: https://shiny.rstudio.com/  
+
+
+(Remember that it's ok to have pieces of the project that don't fit into the chosen output format; in those cases you can provide links to the relevant material.)
+
+Since we plan on including both stationary and interactive plots, we plan to use an HTML document.  
+
+### 4. The Data
+
+What is your data source?  What is your method for importing data? Please be specific. Provide relevant information such as any obstacles you're encountering and what you plan to do to overcome them.
+
+[5 points]
+
+```{r}
+load("35509-0001-Data.rda")
+drug_study <- da35509.0001
+```
+
+Our data source is the National Survey on Drug Use and Health from 2013. The primary investigators were the United States Department of Health and Human Services, the Substance Abuse and Mental Health Services Administration, and the Center for Behavioral Health Statistics and Quality. The dataset itself contains a myriad of informaition about the use of drugs, alcohol, and tobacco. It also covers mental and physical illnesses, population demographics, criminal activities, and more.  The target demographic is members of US households, age 12 and older.
+
+We imported our data as a .rda file, which added a new challenge because loading and accessing the data was different than with the previous file types we have worked with. As we are working with survey data, we will make sure to be aware of all the possible challenges that may come with this (for example, making sure that "missing" values are actually "missing" and are not logically "no." We are checking this by going back to earlier survey sections to see how participants earlier responses may have caused parts of the survey to be skipped).
+
+
+### 5. Provide a short summary, including 2-3 graphs, of your initial investigations. 
+
+[10 points]
+
+First, in order to get a better idea of the populations represented in our sample, we looking at the number of respondents in each category for each demographic, as well as the proportion of respondents who have used Oxycontin.
+
+# Summary
+
+```{r 5load}
+# Examine the overall survey demographic
+summary(drug_study$IRSEX)
+summary(drug_study$AGE2)
+summary(drug_study$INCOME)
+summary(drug_study$EDUCCAT2)
+summary(drug_study$NEWRACE2)
+
+# Proportion of Oxycontin users in data
+drug_study$OXYEVER <- ifelse(drug_study$OXYFLAG == "(1) Ever Used (IROXYRC = 1-3)","yes","no")
+print(sum(drug_study$OXYEVER=="yes")/nrow(drug_study))
+```
+
+We have relatively equal proportions of male and female respondents, and note that we have unequal bins for age. About 1/3 of respondents are ages 12-17 (classified as "youth"), and another approximately 15% are 18-21 years old; we have respondent's exact age for these ranges of years. Our population is skewed to be younger, and we have a large bin from 50-64 years old as well as one that has ages 65 and older. Since we already plan to look at youth specifically for part of our research and it may be difficult to interpolate much with the information we have on other ages, we will mostly leave this characteristic out of our research. Education status and income tend to be closely correlated, and we can see that while we do not have education information for our youth population, we have income for all respondents, so we plan to include this variable as well. Finally, close to 60% of survey respondents were non-Hispanic whites. We have a large proportion of Hispanic and Black respondents, followed by significantly smaller proportions of other races. Since we are only looking at a small subset of respondents (only those for used Oxycontin), we will have limited data for race and are choosing to leave it out for now.
+
+We can also see that about 3.3% of survey respondents have at some point used Oxycontin non-medically. For our first visualization, we wanted more insight on whether and how certain groups, or combinations of groups, were using Oxycontin. To see how our drug users vary with regard to income and sex, we created the mosaic plot below. By only looking at users, this visualization made it a lot easier to differentiate between what groups were using Oxy. While income is interesting to look at, we must take it with a grain of salt, since after $75,000, we don't have a true idea of how much income people have, and that could be a very large range.
+
+# Income and Sex
+
+```{r 5b}
+# clean data for graph
+drug_study_sub <- drug_study[drug_study$OXYEVER=="yes",]
+drug_study_sub$Sex <- ifelse(drug_study_sub$IRSEX == "(1) Male","Male","Female")
+drug_study_sub$INCOME <- as.character(drug_study_sub$INCOME)
+
+for (i in 1:nrow(drug_study_sub)) {
+  if (drug_study_sub$INCOME[i]=="(1) Less than $20,000") {
+    drug_study_sub$INCOME[i] = "<$20,000"
+  }
+  else if (drug_study_sub$INCOME[i]=="(2) $20,000 - $49,999") {
+    drug_study_sub$INCOME[i] = "$20,000 - $49,999"
+  }
+  else if (drug_study_sub$INCOME[i] == "(3) $50,000 - $74,999") {
+    drug_study_sub$INCOME[i] = "$50,000 - $74,999"
+  }
+  else if (drug_study_sub$INCOME[i] == "(4) $75,000 or More") {
+    drug_study_sub$INCOME[i] = ">$75,000"
+  }
+}
+drug_study_sub$Sex <- as.factor(drug_study_sub$Sex)
+drug_study_sub$Income_Brackets <- as.factor(drug_study_sub$INCOME)
+drug_study_sub$Income <- fct_relevel(drug_study_sub$Income_Brackets,">$75,000",after=3)
+mosaic(Income ~ Sex,
+       data = drug_study_sub, 
+       direction = c("v", "h"),
+       labeling_args = list(rot_labels = c(0, 0, 0, 0), offset_varnames = c(left = 6), offset_labels = c(left = 2.6)),
+       main = "Sex and Income of Oxycontin Users")
+```
+
+Above we can see that similar proportions of females and males have used Oxycontin non-medically (slightly more males than females). However, we do see some differences of use within gender when we vary income level. For both genders, we see that the highest proportion of users has an income of between $20,000 and $49,000. For females, usage drops off a bit after that (the majority of female users tend to be more poor). On the other hand, our male respondents with the highest income made up a larger portion of male users. When we look at income alone, we see a similar trend to male usage (about 30% of users make <$20,000 per year, 35% between $20,000 and $49,999, 15% between $50,000 and $74,999, and 20% make >$75,000 per year). 
+
+# Income and Age of First Use
+
+Exploring income further, we decided to look at how age of first use varied across income levels using histograms faceted by income bracket. We freed the y-scale since groups had varying n's and we wanted to be able to compare the shapes more easily while still seeing the counts.
+
+```{r 5c,warning=FALSE}
+#suppress warning message about the 75 NAs being removed to construct the histograms
+ggplot(data = drug_study_sub, mapping = aes(OXYCAGE)) + 
+  geom_histogram(binwidth = 3) + 
+  facet_wrap(~Income,scales="free_y") + 
+  labs(title = "Age First Used Oxycontin For Various Income Levels", x = "Age First Used Oxycontin", y = "Count") +  scale_x_continuous(breaks=seq(10,60,5)) +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+Generally, we see that most Oxycontin users tried the drug first around ages 16-19. The second most popular age group is 13-16.  As the age  of first use variable increases, the proportion of people drops off. All the graphs are right skewed and seem to have a similar range between 13 and 60. For this reason, it is not a particularly interesting graph and we will likely not include it in our final project.
+
+# Income and Crime 
+Finally, we look at the relationship between income and crime, specifically whether or not Oxycontin users have been arrested.
+```{r, warning=FALSE}
+#suppress warning message about the 8 NAs being removed to construct the chart
+summary(drug_study_sub$BOOKED)
+
+drug_study_sub$BOOKED = revalue(drug_study_sub$BOOKED, c("(1) Yes"="Yes", "(2) No"="No", "(3) Yes LOGICALLY ASSIGNED"="Yes"))
+
+
+ggplot(drug_study_sub[!is.na(drug_study_sub$BOOKED),]) +
+  aes(x = Income, fill = fct_rev(BOOKED)) +
+  labs(fill = "Arrested", y = "Proportion of Arrests",x="Income",title="Proportion of Arrests by Income for Oxycontin Users") +
+  geom_bar(position = "fill") + 
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+We view the summary statistics to see that nearly half of all Oxycontin users have been arrested and booked for a crime, and nearly half have not.  Exploring this in a graph did not seem particularly interesting. Instead, we decided to explore the interesting relationship between drug use, income, and crime with a stacked bar chart (removing the NAs since there were only 3).  We can clearly see that as income increases, the proportion of users who have been arrested decreases.
+
+Overall, we're beginning to find interesting trends in our data relating to Oxycontin users in terms of demographics, mental and physical health, criminal activity and much more.  These questions have already led to many new ones that we hope to explore thoroughly in our final project.
