@@ -7,9 +7,28 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(vcd)
+library(forcats)
+library(scales)
+library(dplyr)
+library(plyr)
 ```
 
 ## I. Introduction
+
+Over the last few years, the opioid crisis in America has been worsening rapidly and is perhaps finally gaining the public and media awareness it needs The topic is both concerning and fascinating. When people think of drugs, the most obvious, widespread choices are alcohol and marijuana. The flashier ones that may come to mind afterwards include cocaine, LSD, ecstasy, and so on. 
+
+Opioids, however, are getting more and more common. The National Institute on Drug Abuse found in January 2019 that "more than 130 people in the United States die after overdoing on opioids" every day. Opioids are most commonly prescription pain relievers but also include heroin and synthetic opioids such as fentanyl. The Centers for Disease Control and Prevention has released an estimate that opioid misuse in the US costs $78.5 billion a year in terms of healthcare costs, lost productivity, rehab treatments, and criminal justice activities.
+
+An alarming number of doctors have been caught for inappropriate opiod prescription. Moreover, 21 to 29% of chronic pain patients have been found to misuse their prescribed opioids.  8 to 12% may develop an opioid use disorder, and 4 to 6% transition from an opioid prescripton to heroin use. Given these worrisome figures, we chose to explore data regarding the United States drug use and abuse. We are most interested in questions such as:
+
+  - What are the interesting relationships between opioid abuse and different demographics?
+  - What particular difficulties do youth who abuse Oxycontin face?
+  - Is there are strong relationship between Oxycontin abuse and crime? What interesting depth can income and education add to this relationship?
+  - What trends do we see between opioid abuse and other substance abuse?
+  - We know thereis a relationship between physical illness and opioid abuse, bu what about mental illness?
+  - 
 
 ## II. Data Sources
 
