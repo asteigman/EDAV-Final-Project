@@ -1,0 +1,24 @@
+---
+title: "Final Project: Exploring the National Survey on Drug Use and Health "
+author: "Suman Tripathy, Amanda Steigman"
+date: "11/23/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## I. Introduction
+
+## II. Data Sources
+
+## III. Data Transformation
+
+## IV. Missing Values
+
+## V. Results
+
+## VI. Interactive Component
+
+## VII. Conclusion
