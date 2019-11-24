@@ -1,0 +1,40 @@
+Adderall Analysis
+
+- Loaded data
+- Gather people who have used Adderall non-medically 
+- Showed that college students age 18-22 only aabout 1.3 times as likely as people of same age not in college, not twice
+- Big difference between adderall use in black vs white kids
+- Analyze by age categories (percent ppl in each age group using adderall)
+- Analyze which regions have highest use of study drugs
+- Correlation between study drugs and higher SAT/ACT scores
+- Correlation between college students who used Adderall non-medically and hgiher levels of depression / suicidal thoughts
+- Google searches for adderall in college towns spiked during exam months and dropped during summer months
+- family income below 10000 = highest rate of nonmedical adderall, fam incomes above 75000 has lowest
+
+
+Our Analysis Plan
+- Load data
+- Clean up some impt columns we want to look at
+- Talk about the issues cited in this article: https://www.tandfonline.com/doi/full/10.1080/00952990.2018.1521826 and the use of "non-medically" and how it's defined and such and how we'll take that into consideration in our analysis
+- Do missing data analysis
+- Explore some demographic info (most common age group using opioids, how often each age group uses opioids, maybe single out subsets of heavy opioid users (maybe more than 1/3 of the year), make estimates of how many misusers using it "to get high" as opposed to relieve their own pain / sleeping / anxiety)
+- Explore income and education relationship to opioid use, esp in heaviest users
+- Explore crime relationship to opioid use, esp in heaviest users
+- Explore physical and mental health condiitons, sleep, and anxiety conditions (esp across different brackets of use rate (i.e. 1-10 times a year, 10-50 times, 50-100, 100-200, 200+))
+
+NOTES:
+The NSDUH defined 12-month nonmedical use of prescription opioids as use in the prior 12 months without a prescription or as use with a prescription simply for the experience or feeling caused by opioids.12 If respondents reported using prescription opioids nonmedically in the past year, they were asked to state the number of days they used them nonmedically. Consistent with previous work,11,15,16 we defined frequent users as those with 100 days or more of nonmedical opioid use in the past year and highly frequent users as those with 200 days or more. For persons reporting nonmedical prescription opioid use, NSDUH collected sources of the medications, including given by a friend or a relative for free, prescribed by 1 or more physicians, stolen from a friend or a relative, bought from a friend or a relative, and bought from a drug dealer or stranger. Age at first nonmedical use of prescription opioids was also assessed (<18, 18-29, or ≥30 years).
+
+source: https://jamanetwork.com/journals/jama/article-abstract/2456166?fbclid=IwAR2tob30FHZvsMfyw2UsrMI4FQ00_716DjjmUlfmxW-SKrF9r9gy9_w63MA
+
+
+
+
+Barriers to accurately assessing prescription opioid misuse on surveys
+
+Some national surveys define misuse or nonmedical use simply as use without one’s doctor telling them to take it (15) or using a prescription drug without a prescription (14). Through 2014, the NSDUH queried nonmedical use which it defined as when a prescription opioid was used when not prescribed to the user or used for the experience or feeling caused by the drug (32).
+
+Misuse or nonmedical use can indeed be a confusing concept as it is possible for individuals to use as prescribed and still enjoy the feeling resulting from use. Overuse and use past the prescribed window period can also lead to possible confusion—especially when use for medical reasons (related or not related to the original prescribed purpose) overlaps with the definition of misuse. A survey of middle and high school students found that “medical misuse” is common with many individuals using opioids as other (or later) forms of self-medication (33). Nearly a fifth (18%) of those using their prescribed opioids reported using for nonmedical reasons. However, of these, 88% reportedly used nonmedically to treat pain, 8% reportedly used to help sleep, and 8% to decrease anxiety. Less than a fifth (14%) reported using opioids to get high. A more recent study of 2015 NSDUH data estimated that two-thirds (66%) of adults who had misused prescription opioids in the past year used mainly to relieve physical pain, and nearly half (49%) of adults with opioid use disorder also used mainly to alleviate pain (34). Only about 1 in 10 (11%) misusers is estimated to use to get high as their main motivation for use. Nonmedical use, thus, often includes use for self-medication rather than to get high. So, interpretation should be cautious as misuse or nonmedical use often simply suggests use that is not specifically medically sanctioned, yet not necessarily used to get high.
+
+source: https://www.tandfonline.com/doi/full/10.1080/00952990.2018.1521826
+
