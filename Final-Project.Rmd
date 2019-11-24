@@ -28,13 +28,16 @@ An alarming number of doctors have been caught for inappropriate opiod prescript
   - Is there are strong relationship between Oxycontin abuse and crime? What interesting depth can income and education add to this relationship?
   - What trends do we see between opioid abuse and other substance abuse?
   - We know thereis a relationship between physical illness and opioid abuse, bu what about mental illness?
+  - What are the most common sources of obtaining opioids if not from a medical prescription?
   - 
 
 ## II. Data Sources
 
 Our data source is the National Survey on Drug Use and Health from 2013. The primary investigators were the United States Department of Health and Human Services, the Substance Abuse and Mental Health Services Administration, and the Center for Behavioral Health Statistics and Quality. This survey has been conducted perioidically since 1971 and has transitioned from a traditional paper-pencil method to a computer-assisted interviewing method. It combines computer-assisted personal interviewing and computer-assisted self-interviewing. It is a highly private and confidential system in order to encourage participant honesty regarding these sensitive behaviors.
 
-The demographic population is "the civilian, noninstituitionalized population of the United States ... who were 12 years of age or older at the time of the survey." Since 2002, NSDUH respondents have been incentivized with a $30 reward for taking the survey, and an improvement in the survey response rate was noted afterwards. This increase in response rate may also be tied to better public awareness about these critical issues.  ** SHOULD TRY TO LOOK FOR MORE CONCRETE INFO ON HOW THE SURVEY IS SENT OUT **
+The demographic population is "the civilian, noninstituitionalized population of the United States ... who were 12 years of age or older at the time of the survey." Since 2002, NSDUH respondents have been incentivized with a $30 reward for taking the survey, and an improvement in the survey response rate was noted afterwards. This increase in response rate may also be tied to better public awareness about these critical issues.  
+
+** SHOULD TRY TO LOOK FOR MORE CONCRETE INFO ON HOW THE SURVEY IS SENT OUT ** LOOK AT SAMPLE SECTION: https://www.icpsr.umich.edu/icpsrweb/NAHDAP/studies/35509/documentation# AND INCLUDE INFO ABOUT RESPONSE RATES
 
 source: https://www.icpsr.umich.edu/icpsrweb/NAHDAP/studies/35509/documentation#
 
@@ -49,7 +52,18 @@ We imported our data as a .rda file, which added a new challenge because loading
 ## IV. Missing Values
 
 ## V. Results
+```{r}
+mosaic(INCOME ~ SEX, 
+       direction=c('v','h'), 
+       labeling_args = list(rot_labels = c(0, 0, 0, 0), 
+                            offset_varnames = c(left = 6), 
+                            offset_labels = c(left = 2.6)),
+       gp = grid::gpar(fill=c('#CCCCFF', '#CC99FF', '#9966CC', '#663399')),
+       main = "Sex and Income of Oxycontin Users",
+       drug_study_demographic,)
+```
 
+Above we can see that similar proportions of females and males have used Oxycontin non-medically (slightly more males than females). However, we do see some differences of use within gender when we vary income level. For both genders, we see that the highest proportion of users has an income of between $20,000 and $49,000. For females, usage drops off a bit after that (the majority of female users tend to be more poor). On the other hand, our male respondents with the highest income made up a larger portion of male users. When we look at income alone, we see a similar trend to male usage (about 30% of users make <$20,000 per year, 35% between $20,000 and $49,999, 15% between $50,000 and $74,999, and 20% make >$75,000 per year). 
 ## VI. Interactive Component
 
 ## VII. Conclusion

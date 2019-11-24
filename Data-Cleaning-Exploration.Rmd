@@ -7,6 +7,12 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(vcd)
+library(forcats)
+library(scales)
+library(dplyr)
+library(plyr)
 ```
 
 ```{r}
@@ -33,20 +39,8 @@ drug_study_sub <- drug_study[drug_study$OXYEVER=="yes",]
 drug_study_sub$Sex <- ifelse(drug_study_sub$IRSEX == "(1) Male","Male","Female")
 drug_study_sub$INCOME <- as.character(drug_study_sub$INCOME)
 
-for (i in 1:nrow(drug_study_sub)) {
-  if (drug_study_sub$INCOME[i]=="(1) Less than $20,000") {
-    drug_study_sub$INCOME[i] = "<$20,000"
-  }
-  else if (drug_study_sub$INCOME[i]=="(2) $20,000 - $49,999") {
-    drug_study_sub$INCOME[i] = "$20,000 - $49,999"
-  }
-  else if (drug_study_sub$INCOME[i] == "(3) $50,000 - $74,999") {
-    drug_study_sub$INCOME[i] = "$50,000 - $74,999"
-  }
-  else if (drug_study_sub$INCOME[i] == "(4) $75,000 or More") {
-    drug_study_sub$INCOME[i] = ">$75,000"
-  }
-}
+drug_study_sub$INCOME = revalue(drug_study_sub$INCOME, c("(1) Less than $20,000"="<$20,000", "(2) $20,000 - $49,999"="$20,000 - $49,999", "(3) $50,000 - $74,999"="$50,000 - $74,999", "(4) $75,000 or More"=">$75,000"))
+
 drug_study_sub$Sex <- as.factor(drug_study_sub$Sex)
 drug_study_sub$Income_Brackets <- as.factor(drug_study_sub$INCOME)
 drug_study_sub$Income <- fct_relevel(drug_study_sub$Income_Brackets,">$75,000",after=3)
@@ -56,3 +50,153 @@ mosaic(Income ~ Sex,
        labeling_args = list(rot_labels = c(0, 0, 0, 0), offset_varnames = c(left = 6), offset_labels = c(left = 2.6)),
        main = "Sex and Income of Oxycontin Users")
 ```
+
+
+```{r}
+impt interesting columns we may want to look at
+HEREVER - Ever used heroin
+HERAGE - age when first used heroin
+HERREC - time since last used heroin
+HERYRTOT - total num of days using heroin in past year
+HERFLAG	HEROIN - EVER USED
+HERYR	HEROIN - PAST YEAR USE
+HERMON	HEROIN - PAST MONTH USE
+
+ANLFLAG	PAIN RELIEVERS - EVER USED
+ANLYR	PAIN RELIEVERS - PAST YEAR USE
+ANLMON	PAIN RELIEVERS - PAST MONTH USE
+DARVTYLC - EVER USED DARVOCET, DARVON, OR TYLENOL W/ CODEINE
+PERCTYLX - EVER USED PERCOCET, PERCODAN, OR TYLOX
+VICOLOR	- EVER USED VICODIN, LORTAB, OR LORCET
+ANLCARD	- EVER USED PAIN RELIEVER BELOW RED LINE ON CARD A
+CODEINE	- EVER USED CODEINE NONMEDICALLY
+DEMEROL	- EVER USED DEMEROL NONMEDICALLY
+DILAUD	- EVER USED DILAUDID NONMEDICALLY
+FIORICET	- EVER USED FIORICET NONMEDICALLY
+FIORINAL	- EVER USED FIORINAL NONMEDICALLY
+HYDROCOD -	EVER USED HYDROCODONE NONMEDICALLY
+METHDON	- EVER USED METHADONE NONMEDICALLY
+MORPHINE	- EVER USED MORPHINE NONMEDICALLY
+OXYCONTN	- EVER USED OXYCONTIN NONMEDICALLY
+PHENCOD	- EVER USED PHENAPHEN WITH CODEINE NONMEDICALLY
+PROPOXY	- EVER USED PROPOXYPHENE NONMEDICALLY
+SK65A	- EVER USED SK65 NONMEDICALLY
+STADOL	- EVER USED STADOL NONMEDICALLY
+TALACEN	- EVER USED TALACEN NONMEDICALLY
+TALWIN	- EVER USED TALWIN NONMEDICALLY
+TALWINNX -	EVER USED TALWINNX NONMEDICALLY
+TRAMADOL -	EVER USED TRAMADOL NONMEDICALLY
+ULTRAM - EVER USED ULTRAM NONMEDICALLY
+ANLNOLST - EVER USED ANY OTHER PAIN RELIEVER NONMEDICALLY
+ANALAGE - AGE WHEN FIRST USED PAIN RELIEVERS NONMEDICALLY
+OXYCAGE	- AGE WHEN FIRST USED OXYCONTIN NONMEDICALLY
+OXYCYFU	- YEAR OF FIRST OXYCONTIN USE - RECODE
+OXYCMFU	- MONTH OF FIRST OXYCONTIN USE - RECODE
+OXYCREC -	TIME SINCE LAST USED OXYCONTIN NONMEDICALLY
+OXYYRTOT	- TOTAL NUM DAYS USED OXYCONTIN PAST 12 MONTHS
+OXTOTFG	- TRIMMING INDICATOR FOR OXYYRTOT
+OXFQFLG	- TRIMMED OXYYRTOT IF R USED < 12 MOS
+OXBSTWAY	- EASIEST WAY TO TELL US NUM DAYS USED OXYCONTIN
+OXDAYPYR	- NUM DAYS USED OXYCONTIN 'NM' PAST 12 MONTHS
+OXDAYPMO	- NUM DAYS PER MO USED OXYCONTIN 'NM' PAST 12 MOS
+OXDAYPWK	- NUM DAYS PER WK USED OXYCONTIN 'NM' PAST 12 MOS
+IRANLFY	PAIN RELIEVER FREQ PAST YEAR - IMPUTATION REVISED
+IIANLFY	PAIN RELIEVER FREQ PAST YEAR - IMP INDICATOR
+II2ANLFY	PAIN RELIEVER FREQ PAST YR-DETAILED IMP INDICATOR
+IRHERFM	HEROIN FREQUENCY PAST MONTH - IMPUTATION REVISED
+IIHERFM	HEROIN FREQUENCY PAST MONTH - IMPUTATION INDICATOR
+II2HERFM	HEROIN FREQ PAST MONTH - DETAILED IMP INDICATOR
+
+ANLRX1D2	GOT ONE+ RX FOR ANL FROM JUST ONE DOCTOR - PST MON
+ANLRXDS2	GOT RX FOR ANL FROM 2 OR MORE DOCTORS - PST MON
+ANLRXFK2	WROTE FAKE PRESCRIPTION FOR ANL - PST MON
+ANLSTOL2	STOLE ANL FROM DRS OFF/CLIN/HOSP/PHARM - PST MON
+ANLFRFE2	GOT ANL FROM A FRIEND/RELATIVE FOR FREE - PST MON
+ANLFRBY2	BOUGHT ANL FROM A FRIEND OR RELATIVE - PST MON
+ANLFRTK2	TOOK ANL FROM FRND/RELATIVE WITHOUT ASK - PST MON
+ANLDEAL2	BOUGHT ANL FROM DRUG DEALR/OTH STRANGER - PST MON
+ANLINET2	BOUGHT ANL ON THE INTERNET - PST MON
+ANLOTHW2	GOT ANL IN SOME OTHER WAY - PST MON
+GOVTPROG	PARTICIPATED IN ONE OR MORE GOVT ASSIST PROGRAMS
+INCOME	TOTAL FAMILY INCOME RECODE
+POVERTY2	POVERTY LEVEL (% OF US CENSUS POVERTY THRESHOLD)
+```
+
+```{r}
+drug_study_demographic = drug_study_sub %>% 
+  select(INCOME, IRSEX, EMPSTATY, AGE2, EDUCCAT2, NEWRACE2)
+
+drug_study_demographic$SEX = revalue(drug_study_demographic$IRSEX, c("(1) Male"="Male", "(2) Female"="Female"))
+drug_study_demographic$EMPSTATY = revalue(drug_study_demographic$EMPSTATY, c("(1) Employed full time"="Employed full time", "(2) Employed part time"="Employed part time", "(3) Unemployed"="Unemployed", "(4) Other (incl. not in labor force)"="Other (incl. not in labor force)"))
+drug_study_demographic$EDUCCAT2 = revalue(drug_study_demographic$EDUCCAT2, c("(1) Less than high school (IREDUC2<=7 and AGE2>=7)"="Less than high school", "(2) High school graduate (IREDUC2=8 and AGE2>=7)"="High school graduate", "(3) Some college (IREDUC2=9-10 and AGE2>=7)"="Some college", "(4) College graduate (IREDUC2=11 and AGE2>=7)"="College Graduate", "(5) 12 to 17 year olds (AGE2<=6)"="Less than high school"))
+```
+
+```{r}
+library(mi)
+x <- missing_data.frame(drug_study_demographic)
+image(x)
+```
+
+```{r}
+drug_study_demographic$INCOME <- fct_relevel(drug_study_demographic$INCOME,">$75,000",after=3)
+mosaic(INCOME ~ SEX, 
+       direction=c('v','h'), 
+       labeling_args = list(rot_labels = c(0, 0, 0, 0), 
+                            offset_varnames = c(left = 6), 
+                            offset_labels = c(left = 2.6)),
+       gp = grid::gpar(fill=c('#CCCCFF', '#CC99FF', '#9966CC', '#663399')),
+       main = "Sex and Income of Oxycontin Users",
+       drug_study_demographic)
+```
+```{r}
+summary(drug_study_demographic$EDUCCAT2)
+```
+
+
+```{r}
+mosaic(EDUCCAT2 ~ EMPSTATY, 
+       direction=c('v','h'), 
+       labeling_args = list(rot_labels = c(45, 0, 0, 0), 
+                            offset_varnames = c(left = 6), 
+                            offset_labels = c(left = 2.6)),
+       gp = grid::gpar(fill=c('#CCCCFF', '#CC99FF', '#9966CC', '#663399')),
+       main = "Sex and Income of Oxycontin Users",
+       drug_study_demographic)
+# Out of Oxycontin users, definitely a much smaller portion are college graduates. 88% of users had some college or less (obviously depends on age as well) so let's look at users over 21 and see how many of them are college grads
+```
+
+```{r}
+ofAge = c("(11) Respondent is 22 or 23 years old", "(12) Respondent is 24 or 25 years old", "(13) Respondent is between 26 and 29 years old", "(14) Respondent is between 30 and 34 years old", "(15) Respondent is between 35 and 49 years old", "(16) Respondent is between 50 and 64 years old", "(17) Respondent is 65 years old or older")
+drug_study_demographic_adults <- drug_study_demographic[(drug_study_demographic$AGE2 %in% ofAge), ]
+summary(drug_study_demographic_adults$EDUCCAT2)
+```
+```{r}
+ggplot(drug_study_demographic_adults, mapping=aes(EDUCCAT2)) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5)) +
+  xlab("Education Level") +
+  ggtitle("Education Breakdown of Oxycontin-using Adults") + 
+  geom_bar()
+
+
+# We see that 15.3% of Oxycontin using adults have an education of less than high school and 17.7% have a college degree.   Interesting that the lowest education tier has an even lower usage rate.  Remaining 67% either high school graduates or some college.
+```
+
+
+```{r}
+ggplot(drug_study_demographic, mapping=aes(NEWRACE2)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  ggtitle("Race breakdown of Oxycontin Users") + 
+  geom_bar()
+
+ggplot(drug_study, mapping=aes(NEWRACE2)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  ggtitle("Race breakdown of all survey participants") + 
+  geom_bar()
+
+# Race variable not esp useful since even in original study, people predominantly nonhispanic whites and this is even more true in the subset of oxycontin users
+# we lose some number of black and hispanic people, which implies that maybe these groups dont do oxy as much?
+```
+
+
+
+
