@@ -13,6 +13,7 @@ library(forcats)
 library(scales)
 library(dplyr)
 library(plyr)
+library(tidyverse)
 ```
 
 ```{r}
@@ -270,5 +271,188 @@ ggplot(data = drug_study_sub, mapping = aes(ANLYRTOT)) +
 # Proportion of opioid users in data
 summary(drug_study$ANLEVER)
 print(8094/nrow(drug_study))
+dim((drug_study))
 ```
+
+
+
+## STARTING FRESH HERE GOING BASED ON ANALYSIS PLAN ##
+```{r}
+load("35509-0001-Data.rda")
+drug_study <- da35509.0001
+```
+
+
+```{r}
+# ANLEVER : EVER USED PAIN RELIEVERS NONMEDICALLY
+opioid_users <- drug_study[!is.na(drug_study$ANLEVER),]
+cat('Percentage of all survey participants who have used prescription pain relievers nonmedically')
+cat('\n')
+cat(nrow(opioid_users)/nrow(drug_study)*100)
+cat('%')
+```
+
+
+```{r}
+# DATA CLEANING (maybe separate into another script eventually)
+
+# SEX VARIABLE
+opioid_users$Sex <- ifelse(opioid_users$IRSEX == "(1) Male","Male","Female")
+opioid_users$Sex <- as.factor(opioid_users$Sex)
+
+# INCOME VARIABLE
+opioid_users$INCOME <- revalue(opioid_users$INCOME, c("(1) Less than $20,000"="<$20,000", "(2) $20,000 - $49,999"="$20,000 - $49,999", "(3) $50,000 - $74,999"="$50,000 - $74,999", "(4) $75,000 or More"=">$75,000"))
+opioid_users$Income_Brackets <- as.factor(opioid_users$INCOME)
+opioid_users$Income <- fct_relevel(opioid_users$Income_Brackets,">$75,000",after=3)
+```
+
+```{r}
+# ANALAGE : AGE WHEN FIRST USED PAIN RELIEVERS NONMEDICALLY
+
+summary(opioid_users$ANALAGE)
+# We see that the lowest age of recorded non-medical opioid use is 1. Obviously, it is impossible that young children purposefully make decisions to misuse opioid, so we will ignore ages below 12 in our analysis of age groups. This is also more logical since it is the youngest age of survey participants, meaning the US Dept of Health deems them of approporiate age to question them about drug and alcohol use. This reduces our subset from 8094 to 7797, removing nearly 300 rows. 
+
+opioid_users_above_12 <- opioid_users[opioid_users$ANALAGE >= 12.0,]
+
+# Histogram and boxplot of first age of non-medical opioid use
+p = ggplot(data = opioid_users_above_12, mapping = aes(ANALAGE)) + 
+  geom_histogram(binwidth = 4) + 
+  labs(title = "Age First Used Opioid", x = "Age", y = "Count") + 
+  scale_x_continuous(breaks=seq(10,60,4)) 
+show(p)
+
+
+data <- layer_data(p, 1)
+lower <- data$xmin
+upper <- data$xmax
+counts <- data$y
+
+cat('\n')
+cat(' Ages       Count of first opioid use in this age range')
+cat('\n')
+for (i in c(1:length(counts))){
+  # justify options
+  cat(sprintf(" %s - %s:   %s \n", toString(lower[i]), toString(upper[i]), toString(counts[i])))
+}
+
+# We see most common age group for trying prescription pain relievers non-medically is 14-18. The next most common is 18-22, and the third most common is 10-14. Interestingly enough, we see the highest initial use in teens and college-aged young adults. Rates seem to taper off more or less continuously as age increases. This raises an interesting find in that perhaps the biggest start to opioid misuse and addiction is not from chronic physical illnesses (found mostly in adults)?
+```
+
+```{r}
+ggplot(data = opioid_users, mapping = aes(ANLYRTOT)) + 
+  geom_histogram(binwidth = 10) + 
+  labs(title = "Total Days Using Non-Medical Pain Reliever in Past Year", x = "Number of Days", y = "Count") + 
+  scale_x_continuous(breaks=seq(0,365,20))
+
+# To be consistent with many previous opioid investigations, we define frequent users as those with 100 or more days of nonmedical opioid use in the past year. Highly frequent users are those with 200 or more days of nonmedical use.
+
+freq_opioid_users <-  opioid_users[opioid_users$ANLYRTOT >= 100,]
+highly_freq_opioid_users <-  freq_opioid_users[freq_opioid_users$ANLYRTOT >= 200,]
+nrow(freq_opioid_users)
+nrow(highly_freq_opioid_users)
+
+# We see 5658 frequent opioid users with 100+ days of use a year.  We see 5379 highly frequent opioid users with 200+ days of use a year.
+```
+
+```{r}
+# Let's check current ages of frequent and highly frequent users (and pray they're not kids!!)
+summary(opioid_users$CATAG7)
+summary(freq_opioid_users$CATAG7)
+summary(highly_freq_opioid_users$CATAG7)
+
+age_breakdown <- as.data.frame(summary(opioid_users$CATAG7))
+age_breakdown <- cbind(age_breakdown, as.data.frame(summary(freq_opioid_users$CATAG7))[-8,])
+age_breakdown <- cbind(age_breakdown, as.data.frame(summary(highly_freq_opioid_users$CATAG7))[-8,])
+colnames(age_breakdown)[1] <- "Opioid Users"
+colnames(age_breakdown)[2] <- "Frequent Opioid Users"
+colnames(age_breakdown)[3] <- "Highly Frequent Opioid Users"
+
+age_breakdown
+ggplot(age_breakdown, aes(fill=condition, y=value, x=specie)) + 
+  geom_bar(position="dodge", stat="identity")
+```
+
+```{r}
+summary(opioid_users$INCOME)
+```
+
+
+```{r}
+p1 <- mosaic(Income ~ Sex, 
+       direction=c('v','v', 'h'), 
+       labeling_args = list(rot_labels = c(90, 0, 0, 0), 
+                            offset_varnames = c(left = 6), 
+                            offset_labels = c(left = 2.6)),
+       gp = grid::gpar(fill=c('#CCCCFF', '#CC99FF', '#9966CC', '#663399')),
+       main = "Sex and Income of Opioid Users",
+       opioid_users)
+
+p2 <- mosaic(Income ~ Sex, 
+       direction=c('v','h'), 
+       labeling_args = list(rot_labels = c(0, 0, 0, 0), 
+                            offset_varnames = c(left = 6), 
+                            offset_labels = c(left = 2.6)),
+       gp = grid::gpar(fill=c('#CCCCFF', '#CC99FF', '#9966CC', '#663399')),
+       main = "Sex and Income of Frequent Opioid Users",
+       freq_opioid_users)
+
+p3 <- mosaic(Income ~ Sex, 
+       direction=c('v','h'), 
+       labeling_args = list(rot_labels = c(0, 0, 0, 0), 
+                            offset_varnames = c(left = 6), 
+                            offset_labels = c(left = 2.6)),
+       gp = grid::gpar(fill=c('#CCCCFF', '#CC99FF', '#9966CC', '#663399')),
+       main = "Sex and Income of Highly Frequent Opioid Users",
+       highly_freq_opioid_users)
+
+summary(opioid_users$Sex)
+summary(freq_opioid_users$Sex)
+summary(highly_freq_opioid_users$Sex)
+
+# We see a pretty believable / expected trend. Users who do opioids frequently and hihgly frequently seem to be poorer - with salaries under $50000. It's interesting that across all types of users, the least popular income bracket for users is $50-75k.  When looking at all opioid users, we see a nearly equal number of men and women, but as we examine the frequent and the highly frequent users, a larger percentage of the users become male.  
+
+# All opioid users: 50.4% men, 49.6% women
+# Frequent users: 54% men, 46% women
+# Highly frequent users: 56.6% men, 43.4% women
+```
+
+```{r}
+p1 <- mosaic(EDUCCAT2 ~ AGE, 
+       direction=c('v','v', 'h'), 
+       labeling_args = list(rot_labels = c(90, 0, 0, 0), 
+                            offset_varnames = c(left = 6), 
+                            offset_labels = c(left = 2.6)),
+       gp = grid::gpar(fill=c('#CCCCFF', '#CC99FF', '#9966CC', '#663399')),
+       main = "Sex and Income of Opioid Users",
+       opioid_users)
+
+p2 <- mosaic(Income ~ Sex, 
+       direction=c('v','h'), 
+       labeling_args = list(rot_labels = c(0, 0, 0, 0), 
+                            offset_varnames = c(left = 6), 
+                            offset_labels = c(left = 2.6)),
+       gp = grid::gpar(fill=c('#CCCCFF', '#CC99FF', '#9966CC', '#663399')),
+       main = "Sex and Income of Frequent Opioid Users",
+       freq_opioid_users)
+
+p3 <- mosaic(Income ~ Sex, 
+       direction=c('v','h'), 
+       labeling_args = list(rot_labels = c(0, 0, 0, 0), 
+                            offset_varnames = c(left = 6), 
+                            offset_labels = c(left = 2.6)),
+       gp = grid::gpar(fill=c('#CCCCFF', '#CC99FF', '#9966CC', '#663399')),
+       main = "Sex and Income of Highly Frequent Opioid Users",
+       highly_freq_opioid_users)
+
+summary(opioid_users$Sex)
+summary(freq_opioid_users$Sex)
+summary(highly_freq_opioid_users$Sex)
+
+# We see a pretty believable / expected trend. Users who do opioids frequently and highly frequently seem to be poorer - with salaries under $50000. It's interesting that across all types of users, the least popular income bracket for users is $50-75k.  When looking at all opioid users, we see a nearly equal number of men and women, but as we examine the frequent and the highly frequent users, a larger percentage of the users become male.  
+
+# All opioid users: 50.4% men, 49.6% women
+# Frequent users: 54% men, 46% women
+# Highly frequent users: 56.6% men, 43.4% women
+```
+
 
