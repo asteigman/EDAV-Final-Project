@@ -23,11 +23,13 @@ Opioids, however, are getting more and more common. The National Institute on Dr
 
 An alarming number of doctors have been caught for inappropriate opiod prescription. Moreover, 21 to 29% of chronic pain patients have been found to misuse their prescribed opioids.  8 to 12% may develop an opioid use disorder, and 4 to 6% transition from an opioid prescripton to heroin use. Given these worrisome figures, we chose to explore data regarding the United States drug use and abuse. We are most interested in questions such as:
 
-  - What are the interesting relationships between opioid abuse and different demographics?
-  - What particular difficulties do youth who abuse Oxycontin face?
-  - Is there are strong relationship between Oxycontin abuse and crime? What interesting depth can income and education add to this relationship?
+RANDOM BRAINSTORM THAT WE CAN PICK AND CHOOSE FROM / ADD TO
+  - What are the interesting trends and rates of opioid abuse within different demographics?
+  - What particular difficulties do youth who abuse opioids face?
+  - Is there are strong relationship between opioid abuse and crime? What interesting depth can income and education add to this relationship?
   - What trends do we see between opioid abuse and other substance abuse?
-  - We know thereis a relationship between physical illness and opioid abuse, bu what about mental illness?
+  - Is crime at all connected with high opioid abuse, and how does this connection compare to crime rates tied to other drugs?
+  - The cause of a lot of opioid misuse is physical illness, but what are differences between use, misuse, and abuse?  Are there any ties to mental illness?
   - What are the most common sources of obtaining opioids if not from a medical prescription?
   - 
 
@@ -41,9 +43,9 @@ The demographic population is "the civilian, noninstituitionalized population of
 
 source: https://www.icpsr.umich.edu/icpsrweb/NAHDAP/studies/35509/documentation#
 
-The dataset itself contains a myriad of informaition about the use of drugs, alcohol, and tobacco. It also covers mental and physical illnesses, population demographics, criminal activities, and more.  The target demographic is members of US households, age 12 and older.
+The dataset itself contains a myriad of informaition about the use of drugs, alcohol, and tobacco. It also covers mental and physical illnesses, population demographics, criminal activities, and more.  The target demographic is members of US households, age 12 and older. The loaded dataframe contains 55160 rows (participants) and 3142 columns (survey questions). Note that some of these columns are imputed values based on responses to other survey questions. 
 
-As we are working with survey data, we will make sure to be aware of all the possible challenges that may come with this (for example, making sure that "missing" values are actually "missing" and are not logically "no." We are checking this by going back to earlier survey sections to see how participants earlier responses may have caused parts of the survey to be skipped).
+As we are working with survey data, we will make sure to be aware of all the possible challenges that may come with this (for example, making sure that "missing" values are actually "missing" and are not logically "no.") We are checking this by going back to earlier survey sections to see how participants earlier responses may have caused parts of the survey to be skipped. We are also evaluating the imputed columns to see whether they are more cleaned and reliable than direct response columns.
 
 ## III. Data Transformation
 
@@ -52,6 +54,9 @@ We imported our data as a .rda file, which added a new challenge because loading
 ## IV. Missing Values
 
 ## V. Results
+
+
+
 ```{r}
 mosaic(INCOME ~ SEX, 
        direction=c('v','h'), 
@@ -67,3 +72,9 @@ Above we can see that similar proportions of females and males have used Oxycont
 ## VI. Interactive Component
 
 ## VII. Conclusion
+
+A major concern and limitation we recognized about the data is the inherent barriers to accurately assessing opioid misuse, most notably the term "misuse" itself. In the American Journal of Drug and Alcohol Abuse, Joseph Palamar wrote an article on this specific subject. The NSDUH 2013 survey acts questions about nonmedical use of drugs, "which it defined as when a prescription opioid was used when not presribed to the user or used for the experience or feeling caused by the drug." This term "nonmedical use" has inherent ambiguity, and recent studies of the NSDUH data estimate that about two-thirds of adults miusing opioids actually used the drug in order to relieve physical pain. Other adults used the medication to relieve stress or anxiety and sleep. Only about 11% of misusers are thought to actually use the opioid to "get high."  These figures are important to remember throughout our analysis of opioid users in order for us to understand the opioid crisis more precisely.
+
+source: https://www.tandfonline.com/doi/full/10.1080/00952990.2018.1521826
+
+To be consistent with many previous opioid investigations, we define frequent users as those with 100 or more days of nonmedical opioid use in the past year. Highly frequent users are those with 200 or more days of nonmedical use.

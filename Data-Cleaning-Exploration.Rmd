@@ -121,6 +121,23 @@ ANLOTHW2	GOT ANL IN SOME OTHER WAY - PST MON
 GOVTPROG	PARTICIPATED IN ONE OR MORE GOVT ASSIST PROGRAMS
 INCOME	TOTAL FAMILY INCOME RECODE
 POVERTY2	POVERTY LEVEL (% OF US CENSUS POVERTY THRESHOLD)
+
+BOOKED	EVER ARRESTED AND BOOKED FOR BREAKING THE LAW
+NOBOOKY2	# TIMES ARRESTED AND BOOKED PAST 12 MONTHS
+BKMVTHFT	ARRSTD & BOOKED FOR MOT VEH THEFT PAST 12 MONTHS
+BKLARCNY	ARRSTD & BOOKED FOR LARCENY/THEFT PAST 12 MONTHS
+BKBURGL	ARRSTD & BOOKED FOR BURGLARY/B & E PAST 12 MOS
+BKSRVIOL	ARRSTD & BOOKED SERIOUS VIOL OFFENSE PST 12 MOS
+BKSMASLT	ARRSTD & BOOKED FOR OTHER ASSAULT PAST 12 MONTHS
+BKROB	ARRSTD & BOOKED FOR ROBBERY PAST 12 MONTHS
+BKARSON	ARRSTD & BOOKED FOR ARSON PAST 12 MONTHS
+BKDRVINF	ARRSTD & BOOKED FOR DUI PAST 12 MONTHS
+BKDRUNK	ARRSTD & BOOKED FOR DRUNKENNESS PAST 12 MONTHS
+BKPOSTOB	ARRSTD & BOOKED FOR POSSES OF TOB PAST 12 MOS
+BKDRUG	ARRSTD & BOOKED FOR POSSES/SALE DRUGS PAST 12 MOS
+BKSEXNR	ARRSTD & BOOKED SEX OFFENSE EXCL RAPE PST 12 MOS
+BKFRAUD	ARRSTD & BOOKED FOR FRAUD/STOL GOODS PAST 12 MOS
+BKOTH	ARRSTD & BOOKED FOR SOME OTHER OFF PAST 12 MOS
 ```
 
 ```{r}
@@ -346,30 +363,46 @@ ggplot(data = opioid_users, mapping = aes(ANLYRTOT)) +
 
 # To be consistent with many previous opioid investigations, we define frequent users as those with 100 or more days of nonmedical opioid use in the past year. Highly frequent users are those with 200 or more days of nonmedical use.
 
-freq_opioid_users <-  opioid_users[opioid_users$ANLYRTOT >= 100,]
-highly_freq_opioid_users <-  freq_opioid_users[freq_opioid_users$ANLYRTOT >= 200,]
+opioid_users <- opioid_users %>% mutate(
+  frequency = case_when(
+    opioid_users$ANLYRTOT < 100                  ~ 'infrequent',
+    opioid_users$ANLYRTOT >= 200                   ~ 'highly frequent',
+    TRUE                              ~ 'frequent'
+  )
+)
+
+opioid_users$frequency
+
+freq_opioid_users <-  opioid_users[opioid_users$frequency == 'frequent',]
+highly_freq_opioid_users <-  freq_opioid_users[opioid_users$frequency == 'highly frequent',]
+infreq_opioid_users <- opioid_users[opioid_users$frequency == 'infrequent',]
 nrow(freq_opioid_users)
 nrow(highly_freq_opioid_users)
+nrow(infreq_opioid_users)
+
 
 # We see 5658 frequent opioid users with 100+ days of use a year.  We see 5379 highly frequent opioid users with 200+ days of use a year.
 ```
 
 ```{r}
 # Let's check current ages of frequent and highly frequent users (and pray they're not kids!!)
-summary(opioid_users$CATAG7)
-summary(freq_opioid_users$CATAG7)
-summary(highly_freq_opioid_users$CATAG7)
 
-age_breakdown <- as.data.frame(summary(opioid_users$CATAG7))
-age_breakdown <- cbind(age_breakdown, as.data.frame(summary(freq_opioid_users$CATAG7))[-8,])
-age_breakdown <- cbind(age_breakdown, as.data.frame(summary(highly_freq_opioid_users$CATAG7))[-8,])
-colnames(age_breakdown)[1] <- "Opioid Users"
-colnames(age_breakdown)[2] <- "Frequent Opioid Users"
-colnames(age_breakdown)[3] <- "Highly Frequent Opioid Users"
+opioid_users$CATAG7 = revalue(opioid_users$CATAG7, c("(1) 12-13 Years Old"="12-13", "(2) 14-15 Years Old"="14-15", "(3) 16-17 Years Old"="16-17", "(4) 18-20 Years Old"="18-20", "(5) 21-25 Years Old"="21-25", "(6) 26-34 Years Old"="26-34", "(7) 35 or Older"="35+"))
 
-age_breakdown
-ggplot(age_breakdown, aes(fill=condition, y=value, x=specie)) + 
-  geom_bar(position="dodge", stat="identity")
+opioid_users$frequency <- factor(opioid_users$frequency, levels = c("highly frequent", "frequent", "infrequent")) # same as below comment, would ideally want legend to be in opposite order
+opioid_users$CATAG7 <- factor(opioid_users$CATAG7, levels = c("35+", "26-34", "21-25", "18-20", "16-17", "14-15", "12-13")) # have to factor them backwards to get it in lowest to highest up to down in graph, weird.... fix for this?
+
+ggplot(opioid_users, aes(CATAG7)) + 
+  geom_bar(aes(fill=frequency), position="fill") + 
+  labs(title="Opioid Use Frequency Based on Age Group",
+        x="Age Bracket",
+        y="Proportion",
+        fill='Frequency of Use') +
+  coord_flip()
+
+# Looks like across most age group, we have similarly low proportions of highly frequent users using opioids 200+ days a year
+# Interesting that from age 14 onwards, we have increasing proportion of frequent users -> 35+ group has greatest group of "frequent" users
+
 ```
 
 ```{r}
@@ -379,8 +412,8 @@ summary(opioid_users$INCOME)
 
 ```{r}
 p1 <- mosaic(Income ~ Sex, 
-       direction=c('v','v', 'h'), 
-       labeling_args = list(rot_labels = c(90, 0, 0, 0), 
+       direction=c('v', 'h'), 
+       labeling_args = list(rot_labels = c(0, 0, 0, 0), 
                             offset_varnames = c(left = 6), 
                             offset_labels = c(left = 2.6)),
        gp = grid::gpar(fill=c('#CCCCFF', '#CC99FF', '#9966CC', '#663399')),
@@ -417,42 +450,10 @@ summary(highly_freq_opioid_users$Sex)
 ```
 
 ```{r}
-p1 <- mosaic(EDUCCAT2 ~ AGE, 
-       direction=c('v','v', 'h'), 
-       labeling_args = list(rot_labels = c(90, 0, 0, 0), 
-                            offset_varnames = c(left = 6), 
-                            offset_labels = c(left = 2.6)),
-       gp = grid::gpar(fill=c('#CCCCFF', '#CC99FF', '#9966CC', '#663399')),
-       main = "Sex and Income of Opioid Users",
-       opioid_users)
-
-p2 <- mosaic(Income ~ Sex, 
-       direction=c('v','h'), 
-       labeling_args = list(rot_labels = c(0, 0, 0, 0), 
-                            offset_varnames = c(left = 6), 
-                            offset_labels = c(left = 2.6)),
-       gp = grid::gpar(fill=c('#CCCCFF', '#CC99FF', '#9966CC', '#663399')),
-       main = "Sex and Income of Frequent Opioid Users",
-       freq_opioid_users)
-
-p3 <- mosaic(Income ~ Sex, 
-       direction=c('v','h'), 
-       labeling_args = list(rot_labels = c(0, 0, 0, 0), 
-                            offset_varnames = c(left = 6), 
-                            offset_labels = c(left = 2.6)),
-       gp = grid::gpar(fill=c('#CCCCFF', '#CC99FF', '#9966CC', '#663399')),
-       main = "Sex and Income of Highly Frequent Opioid Users",
-       highly_freq_opioid_users)
-
-summary(opioid_users$Sex)
-summary(freq_opioid_users$Sex)
-summary(highly_freq_opioid_users$Sex)
-
-# We see a pretty believable / expected trend. Users who do opioids frequently and highly frequently seem to be poorer - with salaries under $50000. It's interesting that across all types of users, the least popular income bracket for users is $50-75k.  When looking at all opioid users, we see a nearly equal number of men and women, but as we examine the frequent and the highly frequent users, a larger percentage of the users become male.  
-
-# All opioid users: 50.4% men, 49.6% women
-# Frequent users: 54% men, 46% women
-# Highly frequent users: 56.6% men, 43.4% women
+summary(opioid_users$BOOKED)
+summary(freq_opioid_users$BOOKED)
+summary(highly_freq_opioid_users$BOOKED)
+summary(infreq_opioid_users$BOOKED)
 ```
 
 
