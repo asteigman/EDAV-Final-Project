@@ -454,6 +454,17 @@ summary(opioid_users$BOOKED)
 summary(freq_opioid_users$BOOKED)
 summary(highly_freq_opioid_users$BOOKED)
 summary(infreq_opioid_users$BOOKED)
+
+opioid_users$BOOKED = revalue(opioid_users$BOOKED, c("(1) Yes"="Yes", "(2) No"="No", "(3) Yes LOGICALLY ASSIGNED"="Yes"))
+
+# Histogram and boxplot of first age of non-medical opioid use
+p = ggplot(data = opioid_users[!is.na(opioid_users$BOOKED),], mapping = aes(BOOKED)) + 
+  geom_bar(aes(y = ..prop.., group = 1)) + 
+  facet_wrap(~frequency) +
+  labs(title = "Ever Been Arrested and Booked for Breaking Law", x = "Been Booked", y = "Proportion")  
+show(p)
+
+# Interestingly enough, we see that in highly frequent opioid users, there is a nearly equal rate of people who have been arrested vs those who have not been. For infrequent and infrequent users, we see that between 65-75% of people have not been arrested and booked, but it's about 50% for highly frequent users.
 ```
 
 
