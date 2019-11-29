@@ -56,7 +56,7 @@ We imported our data as a .rda file, which added a new challenge because loading
 ## V. Results
 
 
-
+# POTENTIALLY REPLACE THIS WITH OPIOID USERS VS FREQ VS HIGHLY FREQ
 ```{r}
 mosaic(INCOME ~ SEX, 
        direction=c('v','h'), 

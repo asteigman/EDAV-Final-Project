@@ -439,6 +439,8 @@ p3 <- mosaic(Income ~ Sex,
        main = "Sex and Income of Highly Frequent Opioid Users",
        highly_freq_opioid_users)
 
+# TO COMPARE FREQ AND HIGHLY FREQ TO ALL USERS OR TO INFREQ USERS?
+
 summary(opioid_users$Sex)
 summary(freq_opioid_users$Sex)
 summary(highly_freq_opioid_users$Sex)
