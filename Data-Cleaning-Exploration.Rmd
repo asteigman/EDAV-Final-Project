@@ -321,6 +321,12 @@ opioid_users$Sex <- as.factor(opioid_users$Sex)
 opioid_users$INCOME <- revalue(opioid_users$INCOME, c("(1) Less than $20,000"="<$20,000", "(2) $20,000 - $49,999"="$20,000 - $49,999", "(3) $50,000 - $74,999"="$50,000 - $74,999", "(4) $75,000 or More"=">$75,000"))
 opioid_users$Income_Brackets <- as.factor(opioid_users$INCOME)
 opioid_users$Income <- fct_relevel(opioid_users$Income_Brackets,">$75,000",after=3)
+
+# AGE VARIABLE
+opioid_users$CATAG7 = revalue(opioid_users$CATAG7, c("(1) 12-13 Years Old"="12-13", "(2) 14-15 Years Old"="14-15", "(3) 16-17 Years Old"="16-17", "(4) 18-20 Years Old"="18-20", "(5) 21-25 Years Old"="21-25", "(6) 26-34 Years Old"="26-34", "(7) 35 or Older"="35+"))
+
+# BOOKED VARIABLE
+opioid_users$BOOKED = revalue(opioid_users$BOOKED, c("(1) Yes"="Yes", "(2) No"="No", "(3) Yes LOGICALLY ASSIGNED"="Yes"))
 ```
 
 ```{r}
@@ -330,6 +336,7 @@ summary(opioid_users$ANALAGE)
 # We see that the lowest age of recorded non-medical opioid use is 1. Obviously, it is impossible that young children purposefully make decisions to misuse opioid, so we will ignore ages below 12 in our analysis of age groups. This is also more logical since it is the youngest age of survey participants, meaning the US Dept of Health deems them of approporiate age to question them about drug and alcohol use. This reduces our subset from 8094 to 7797, removing nearly 300 rows. 
 
 opioid_users_above_12 <- opioid_users[opioid_users$ANALAGE >= 12.0,]
+# SHOULD WE DO ALL THE REST OF THE CALCULATIONS AND GRAPHS WITH THIS? 
 
 # Histogram and boxplot of first age of non-medical opioid use
 p = ggplot(data = opioid_users_above_12, mapping = aes(ANALAGE)) + 
@@ -365,13 +372,11 @@ ggplot(data = opioid_users, mapping = aes(ANLYRTOT)) +
 
 opioid_users <- opioid_users %>% mutate(
   frequency = case_when(
-    opioid_users$ANLYRTOT < 100                  ~ 'infrequent',
-    opioid_users$ANLYRTOT >= 200                   ~ 'highly frequent',
-    TRUE                              ~ 'frequent'
+    opioid_users$ANLYRTOT < 100 ~ 'infrequent',
+    opioid_users$ANLYRTOT >= 200 ~ 'highly frequent',
+    TRUE ~ 'frequent'
   )
 )
-
-opioid_users$frequency
 
 freq_opioid_users <-  opioid_users[opioid_users$frequency == 'frequent',]
 highly_freq_opioid_users <-  freq_opioid_users[opioid_users$frequency == 'highly frequent',]
@@ -387,10 +392,10 @@ nrow(infreq_opioid_users)
 ```{r}
 # Let's check current ages of frequent and highly frequent users (and pray they're not kids!!)
 
-opioid_users$CATAG7 = revalue(opioid_users$CATAG7, c("(1) 12-13 Years Old"="12-13", "(2) 14-15 Years Old"="14-15", "(3) 16-17 Years Old"="16-17", "(4) 18-20 Years Old"="18-20", "(5) 21-25 Years Old"="21-25", "(6) 26-34 Years Old"="26-34", "(7) 35 or Older"="35+"))
-
 opioid_users$frequency <- factor(opioid_users$frequency, levels = c("highly frequent", "frequent", "infrequent")) # same as below comment, would ideally want legend to be in opposite order
 opioid_users$CATAG7 <- factor(opioid_users$CATAG7, levels = c("35+", "26-34", "21-25", "18-20", "16-17", "14-15", "12-13")) # have to factor them backwards to get it in lowest to highest up to down in graph, weird.... fix for this?
+
+# FIX THIS FACTORING AND MOVE IT TO CLEANING SECTION
 
 ggplot(opioid_users, aes(CATAG7)) + 
   geom_bar(aes(fill=frequency), position="fill") + 
@@ -403,10 +408,6 @@ ggplot(opioid_users, aes(CATAG7)) +
 # Looks like across most age group, we have similarly low proportions of highly frequent users using opioids 200+ days a year
 # Interesting that from age 14 onwards, we have increasing proportion of frequent users -> 35+ group has greatest group of "frequent" users
 
-```
-
-```{r}
-summary(opioid_users$INCOME)
 ```
 
 
@@ -450,12 +451,6 @@ summary(highly_freq_opioid_users$Sex)
 ```
 
 ```{r}
-summary(opioid_users$BOOKED)
-summary(freq_opioid_users$BOOKED)
-summary(highly_freq_opioid_users$BOOKED)
-summary(infreq_opioid_users$BOOKED)
-
-opioid_users$BOOKED = revalue(opioid_users$BOOKED, c("(1) Yes"="Yes", "(2) No"="No", "(3) Yes LOGICALLY ASSIGNED"="Yes"))
 
 # Histogram and boxplot of first age of non-medical opioid use
 p = ggplot(data = opioid_users[!is.na(opioid_users$BOOKED),], mapping = aes(BOOKED)) + 
