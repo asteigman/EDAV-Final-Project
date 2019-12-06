@@ -9,32 +9,33 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
 library(vcd)
+library(tidyverse)
 library(forcats)
+library(gridExtra)
+library(gridGraphics)
 library(scales)
+library(mi)
 library(dplyr)
 library(plyr)
 ```
 
 ## I. Introduction
 
-The opioid crisis in America has been worsening rapidly and is perhaps finally gaining the public and media awareness it needs. Opioids are most commonly prescription pain relievers but also include heroin and synthetic opioids such as fentanyl. The topic is both concerning and fascinating, as opioids that are used most frequently are ones that can be prescribed by doctors, such as oxycodone and hydrocodone, with users at times transitioning to illegal opioids like heroin. 
+The opioid crisis in America has been worsening rapidly and is perhaps finally gaining the public and media awareness it needs. Opioids are most commonly prescription pain relievers but also include heroin and synthetic opioids such as fentanyl. The topic is both concerning and fascinating, as the opioids used most frequently are ones that can be prescribed by doctors, such as oxycodone and hydrocodone. Some users may then transition to other drugs or illegal opioids like heroin. 
 
-Opioid usage is getting more and more common. The National Institute on Drug Abuse found in January 2019 that "more than 130 people in the United States die after overdosing on opioids" every day. The Centers for Disease Control and Prevention has released an estimate that opioid misuse in the US costs $78.5 billion a year in terms of healthcare costs, lost productivity, rehab treatments, and criminal justice activities.
+Opioid usage is getting more and more common. The National Institute on Drug Abuse found in January 2019 that "more than 130 people in the United States die after overdosing on opioids" every day. The Center for Disease Control and Prevention has released an estimate that opioid misuse in the US costs $78.5 billion a year in terms of healthcare costs, lost productivity, rehab treatments, and criminal justice activities.
 
-*DEFINE NON-MEDICALLY AND TIE IT INTO NEXT PARAGRAPH*
+Our project explored non-medical opioid use, which doesn't have a very clear meaning. We stick to our data source's definition - when a prescribed opioid is taken but is either not prescribed to the user or is used for the "experience" of the drug. We take all our exploration and analysis with a grain of salt because survey takers may have been unclear about this definition  when answering the questions and moreover, there are unclear boundaries between non-medical use, misuse, and abuse. It is important to recognize these shortcomings about the data so as to qualify all conclusions we derive. 
 
-An alarming number of doctors have been caught for inappropriate opioid prescription. Moreover, 21% to 29% of chronic pain patients have been found to misuse their prescribed opioids. 8% to 12% may develop an opioid use disorder, and 4% to 6% transition from an opioid prescripton to heroin use. Given these worrisome figures, which provide part of the basis for *how* people are using opioids, we chose to explore data regarding *who* is using and abusing opioids in the United States. We focused on answering the following questions:
+Non-medical use can therefore be for a variety of reasons: self-medication, anxiety or depression relief, insomnia, chronic pain management, or simply to get "high." Sources of these opioids can be either the "black market" off the street or directly from doctors. An alarming number of doctors have been caught for inappropriate opioid prescription. Moreover, 21% to 29% of chronic pain patients have been found to misuse their prescribed opioids. 8% to 12% may develop an opioid use disorder, and 4% to 6% transition from an opioid prescripton to heroin use. Given these worrisome figures, which provide part of the basis for *how* people are using opioids, we chose to explore data regarding *who* is misusing opioids in the United States. We focused on answering the following questions:
 
-
-RANDOM BRAINSTORM THAT WE CAN PICK AND CHOOSE FROM / ADD TO
 
   - What are the interesting trends and rates of opioid abuse across different income groups? **
   - Is there are strong relationship between opioid abuse and crime? What interesting depth can income add to this relationship? **
-  - Is crime at all connected with high opioid abuse, and how does this connection compare to crime rates tied to other drugs?
   - What particular difficulties do youth who abuse opioids face? **
   - What factors contribute most to whether an individual uses a prescription painkiller non-medically? ** (I was thinking we could try using the interactive part for this)
   - What trends do we see between opioid abuse and other substance abuse? **
-  - The cause of a lot of opioid misuse is physical illness, but what are differences between use, misuse, and abuse?  Are there any ties to mental illness?
+  - The cause of a lot of opioid misuse is physical illness, but what are the ties to mental illness?
   - What are the most common sources of obtaining opioids if not from a medical prescription?
 
 
@@ -42,21 +43,43 @@ RANDOM BRAINSTORM THAT WE CAN PICK AND CHOOSE FROM / ADD TO
 
 Our data source is the National Survey on Drug Use and Health from 2013. The primary investigators were the United States Department of Health and Human Services, the Substance Abuse and Mental Health Services Administration, and the Center for Behavioral Health Statistics and Quality. This survey has been conducted perioidically since 1971 and has transitioned from a traditional paper-pencil method to a computer-assisted interviewing method. It combines computer-assisted personal interviewing and computer-assisted self-interviewing. It is a highly private and confidential system in order to encourage participant honesty regarding these sensitive behaviors.
 
-The demographic population is "the civilian, noninstituitionalized population of the United States ... who were 12 years of age or older at the time of the survey." Since 2002, NSDUH respondents have been incentivized with a $30 reward for taking the survey, and an improvement in the survey response rate was noted afterwards. This increase in response rate may also be tied to better public awareness about these critical issues.  
-
-** SHOULD TRY TO LOOK FOR MORE CONCRETE INFO ON HOW THE SURVEY IS SENT OUT ** LOOK AT SAMPLE SECTION: https://www.icpsr.umich.edu/icpsrweb/NAHDAP/studies/35509/documentation# AND INCLUDE INFO ABOUT RESPONSE RATES
+The demographic population is "the civilian, noninstituitionalized population of the United States ... who were 12 years of age or older at the time of the survey." Since 2002, NSDUH respondents have been incentivized with a $30 reward for taking the survey, and an improvement in the survey response rate was noted afterwards. This increase in response rate may also be tied to better public awareness about these critical issues. A total final sample of 67,838 interviews were conducted.
 
 source: https://www.icpsr.umich.edu/icpsrweb/NAHDAP/studies/35509/documentation#
 
-The dataset itself contains a myriad of informaition about the use of drugs, alcohol, and tobacco. It also covers mental and physical illnesses, population demographics, criminal activities, and more.  The target demographic is members of US households, age 12 and older. The loaded dataframe contains 55160 rows (participants) and 3142 columns (survey questions). Note that some of these columns are imputed values based on responses to other survey questions. 
+The dataset itself contains a myriad of information about the use of drugs, alcohol, and tobacco. It also covers mental and physical illnesses, population demographics, criminal activities, and more. The target demographic is members of US households, age 12 and older. Our loaded dataframe contains 55160 rows (participants) and 3142 columns (survey questions). Note that some of these columns are imputed values based on responses to other survey questions. Moreover, there is likely a discrepancy between the dataset's rows and total number of interviews due to quality checks for misinformation or missing data. 
 
-As we are working with survey data, we will make sure to be aware of all the possible challenges that may come with this (for example, making sure that "missing" values are actually "missing" and are not logically "no.") We are checking this by going back to earlier survey sections to see how participants earlier responses may have caused parts of the survey to be skipped. We are also evaluating the imputed columns to see whether they are more cleaned and reliable than direct response columns.
+As we are working with survey data, we will make sure to be aware of all the possible challenges that may come with this (for example, making sure that "missing" values are actually "missing" and are not logically "no.") We are checking this by going back to earlier survey sections to see how participants' earlier responses may have caused parts of the survey to be skipped. We are also evaluating the imputed columns to see whether they are more cleaned and reliable than direct response columns.
 
 ## III. Data Transformation
 
-We imported our data as a .rda file, which added a new challenge because loading and accessing the data was different than with the previous file types we have worked with. 
+We imported our data as a .rda file, which added a new challenge because loading and accessing the data was different than with the previous file types we have worked with. It was not extremely difficult though, and once the data was loaded in, we could deal with it as a typical data.frame object.
 
 ## IV. Missing Values
+
+```{r}
+relevant_cols = c('ANLEVER', 'IRSEX', 'INCOME', 'ANYLRTOT', 'BOOKED', 'CATAG7', 'YESCHACT', 'YECOMACT', 'YEFAIACT', 'YEOTHACT', 'ANXDYR', 'DEPRSYR', 'MJEVER', 'STMEVER')
+
+drug_study_subset = drug_study[,colnames(drug_study) %in% relevant_cols]
+
+tidy_subset <- drug_study_subset %>%
+               rownames_to_column("id") %>%
+               gather(key, value, -id) %>%
+               mutate(missing =ifelse(is.na(value), "yes", "no"))
+
+ggplot(tidy_subset, aes(x = key, y = fct_rev(id), fill = missing)) +
+  geom_tile(color ="white") +
+  ggtitle("Missing Data for Relevant Drug Study Columns") +
+  scale_fill_viridis_d() 
+```
+
+```{r}
+x <- missing_data.frame(drug_study_subset)
+image(x)
+library(extracat)visna(mycars)
+```
+
+
 
 ## V. Results
 
@@ -106,8 +129,8 @@ Above we can see that nearly identical proportions of males and females have use
 
 # A BIT DIFFICULT TO UNDERSTAND BOTH OUR ANALYSES ^^^ LETS REWORD
 
-The above graph only considers whether a respondent has used a prescription painkiler non-medically before, but to dig into the data more, we chose to look at the frequency of use, this time focusing only on income. Looking at the frequency can give us a better idea of whether a respondent was abusing an opioid recreationally or whether a user may have been taking the drug for a prolonged period of time for a reason they viewed as necessary, like chronic pain. To be consistent with many previous opioid investigations, we define frequent users as those with 100 or more days of nonmedical opioid use in the past year and highly frequent as those with 200 or more days of nonmedical use. [[In our sample, only 2.6% of users can be classified as highly frequent users, whereas 67.3% said they used prescription painkillers non-medically on a frequent basis and the remaining 30.1% reporting infrequent use.]] 
-# should we show this using what i did in data cleaning and exploration so that it's proven?
+The above graph only considers whether a respondent has used a prescription painkiler non-medically before, but to dig into the data more, we chose to look at the frequency of use, this time focusing only on income. Looking at the frequency can give us a better idea of whether a respondent was abusing an opioid recreationally or whether a user may have been taking the drug for a prolonged period of time for a reason they viewed as necessary, like chronic pain. To be consistent with many previous opioid investigations, we define frequent users as those with 100 or more days of nonmedical opioid use in the past year and highly frequent as those with 200 or more days of nonmedical use. [[In our sample, only 2.6% of users can be classified as highly frequent users, whereas 67.3% said they used prescription painkillers non-medically on a frequent basis and the remaining 30.1% reporting infrequent use.]]  
+# should we show this using what i did in data cleaning and exploration so that it's proven? also maybe let's do a historgram here just to have some non-categorical data type of graphs ?? 
 
 ```{r}
 opioid_users <- opioid_users %>% mutate(
@@ -134,7 +157,8 @@ Across all income groups, we see relatively similar frequencies of opioid use. A
 
 While it is difficult to determine the actual price of purchasing prescription painkillers due to the fact that they are often obtained on the "black market," we used StreetRx, a program that allows people to anonymously submit how much they paid for illegal drugs, as an estimate. According to StreetRx, the average price per milligram of oxycodone, one of the most commonly used prescription painkillers, is $1.40. Based on this, a user would pay around $15 per pill/dose. For a frequent user - which is what the majority of our sample can be classified as - this would mean he spends, on average, between $1,500 and $3,000 per year on prescription painkillers. This is not cheap - especially for someone making $20,000 per year, this could mean 7.5% to 15% of income would be going to drug use. Thus, it is interesting to see this does not necessarily stop a user from using the drug on a frequent basis.
 
-Finally, we look at the relationship between income and crime, specifically whether or not prescription painkiller non-medical users have been arrested, and compare this result to non-users.
+Finally, we look at the relationship between income and crime, specifically whether or not prescription painkiller non-medical users have been arrested, and compare this result to non-users. 
+# maybe rephrase "whether or not they have been arrested" - sounds too 'one and done' type of thing
 
 
 ```{r, warning=FALSE, fig.height=6,fig.width=12}
@@ -197,6 +221,156 @@ We can see that as age increases, a user is more likely to have used a prescript
 *we could think about adding a histogram with age of first use here, but i think we only have that info for oxy so i'm not sure if it makes sense to*
 
 For our youth population as a whole (N = 17,736; ages 12-17), approximately 7.6% of respondents have tried an opioid for non-medical purposes, which is about half of the rate we found overall in the survey. We proceed by examining how this group of users may differ from their peers - first, we look different types of activities that youth respondents participated in. Participation in activities is interesting to look at because it can give us insight to how engaged a youth is - we would expect youths who are more engaged to be less likely to use opioids (and other drugs) non-medically.
+
+```{r}
+#four types of activities - change to reflect participating in one or more vs. not participating at all
+drug_study$School <- ifelse(drug_study$YESCHACT=="(0) None","no","yes")
+drug_study$Community <- ifelse(drug_study$YECOMACT=="(0) None","no","yes")
+drug_study$Faith <- ifelse(drug_study$YEFAIACT=="(0) None","no","yes")
+drug_study$Other <- ifelse(drug_study$YEOTHACT=="(0) None","no","yes")
+
+drug_study$School <- as.factor(drug_study$School)
+drug_study$Community <- as.factor(drug_study$Community)
+drug_study$Faith <- as.factor(drug_study$Faith)
+drug_study$Other <- as.factor(drug_study$Other)
+
+#get proportion yes/no for users and non-users for each activity
+tidy_act <- select(.data=drug_study,Faith,School,Community,Other,OPIOID) %>%
+    gather(key="Activity",value="Participated",-OPIOID)
+tidy_act_yth <- na.omit(tidy_act)
+tidy_act_yth$Participated <- as.factor(tidy_act_yth$Participated)
+tidy_act_yth$Activity <- as.factor(tidy_act_yth$Activity)
+
+ggplot(tidy_act_yth, aes(OPIOID)) + 
+  geom_bar(aes(fill=Participated), position="fill") + 
+  facet_wrap(~fct_relevel(Activity,"Other", after=3)) +
+  labs(title="Youth Participation in Different Activities for Opioid Users vs. Non-Users",
+        x="Used Opioid Non-Medically",
+        y="Proportion",
+        fill='Participated') +
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+We can see that overall, there is not much difference between participation in each activity based on opioid usage - while those youth who have never tried an opioid non-medically have slightly less participation, it is never by more than 5%. Regardless of opioid usage, the highest proportion of youth participates in activities at school, then community activities, followed by faith-based activities, and finally other activities. The overall trend in participation goes againt what we would expect, which leads us to ask: if being more engaged is not a way to prevent opioid usage in teens, what is?
+
+Opioids are both relatively not easily accessible and considered to be a "hard" drug (more risk of addiction and more serious negative health impacts) when compared to, for example, marijuana, which is used more commonly both among adults and teens. If a teen is experimenting with prescription painkillers, we may expect that he or she would also be experimenting with other drugs (we cannot infer anything about causality based on our data, but we can look at the correlations). We test whether there is a relationship between a youth having used a prescription painkiller non-medically and a youth having used marijuana (a less "hard" drug) as well as whether there is a relationship between a youth having used a prescription painkiller and a youth having used stimulants such as amphetamine (another "hard" drug).
+
+```{r}
+#subset data for youth
+drug_study_youth <- drug_study[drug_study$CATAG7=="12-13"|drug_study$CATAG7=="14-15"|drug_study$CATAG7=="16-17",]
+drug_study_youth_plot <- select(drug_study_youth,OPIOID,MJEVER,STMEVER)
+colnames(drug_study_youth_plot) <- c("Painkiller","Marijuana","Stimulant")
+drug_study_youth_plot$Marijuana <- ifelse(drug_study_youth_plot$Marijuana=="(1) Yes","yes","no")
+drug_study_youth_plot$Marijuana <- as.factor(drug_study_youth_plot$Marijuana)
+drug_study_youth_plot$Stimulant <- ifelse(!is.na(drug_study_youth_plot$Stimulant),"yes","no")
+drug_study_youth_plot$Stimulant <- as.factor(drug_study_youth_plot$Stimulant)
+
+#marijuana
+mosaic(Painkiller ~ Marijuana,
+       data = drug_study_youth_plot, 
+       direction = c("v", "h"),
+       gp = grid::gpar(fill=c('light green', 'dark green')),
+       main = "Marijuana Use and Prescription Painkiller Use")
+
+#chisq.test(drug_study_youth_plot$Painkiller,drug_study_youth_plot$Marijuana)
+
+# I WONDER IF WE CAN MAKE ONE OF THOSE PLOTS THAT COMPARE VARIABLES HERE?  LIKE THE MANY SQUARES ONE?
+```
+
+Among youth, 17.6% of respondents reported having used marijuana at least once (a little more than double the proportion of youth who reported having tried prescription painkillers non-medically at least once). The plot above suggests that there is a relationship between teens using marijuana and using prescription opioids, and the Chi-squared test of independence also provided evidence towards this result (p-value of < .01). As we can see, the vast majority - almost 4/5 of youth - have not tried either drug. However, among youth that have tried marijuana, almost 23% have tried using a prescription painkiller non-medically. This is three times the proportion of youth who have tried one of these types of drugs in our general youth survey sample. Interestingly, though, 4.3% of our youth sample tried prescription painkillers without trying marijuana. While this is only a little more than half the rate for youth overall, it is still a bit higher than we would expect. Perhaps the drug was more accessible to these youth because they stole it from their parents or had extra left from a surgery or an injury versus marijuana which they would need to purchase from someone. It is also more difficult to hide marijuana from parents than it is to hide pills.
+
+```{r}
+#stimulants
+mosaic(Painkiller ~ Stimulant,
+       data = drug_study_youth_plot, 
+       direction = c("v", "h"),
+       gp = grid::gpar(fill=c('pink','dark red')),
+       main = "Stimulant Use and Prescription Painkiller Use")
+
+#chisq.test(drug_study_youth_plot$Painkiller,drug_study_youth_plot$Stimulant)
+```
+
+Among youth, only around 2% have reported trying a stimulant at least once. The plot above suggests that there is a relationship between teens using stimulants and using prescription opioids, and the Chi-squared test of independence also provided evidence towards this result (p-value of < .01). Again, most teens - almost 92% - have not tried either drug. Teens who have tried stimulants are extremely more likely to have tried a prescription painkiller non-medically; this is the case for almost 3/5 of teens who have tried stimulants. Having tried a prescription painkiller is not as strong of a predictor of having tried a stimulant - this is the case for about 14.5% of those who have tried opioids (about double the rate for youth overall). Overall, it is interesting that there is a relationship between using the two drugs since they have quite different effects on the user. However, this suggests that teens using both drugs are perhaps more interested in chasing the "high" regardless of what it is specifically and are possibly more interested in experimenting with drugs more generally.
+
+*not sure if we should include this plot since such a small proportion of youth used stimulants*
+
+
+*need to come back and clean these eventually*
+
+### Physical and Mental Health's Relationship to Opioid Abuse
+
+A great deal of opioid abusers claim that they use opioids to self-medicate, either for chronic pain, anxiety, or insomnia. (should i cite the article??) Luckily, the NSDUH survey also included questions about various physical and mental health conditions that we can explore in relation to opioid use.
+
+```{r}
+summary(opioid_users$ANXDYR) # 13.4% of opioid users have anxiety
+summary(drug_study$ANXDYR)  # 6.3 % of all people have anxiety 
+
+summary(opioid_users$DEPRSYR) # 13.5% of opioid users have depression
+summary(drug_study$DEPRSYR) # 6.9% of all people have depression
+
+summary(opioid_users$SLPAPYR) #2.26%
+summary(drug_study$SLPAPYR) # 1.7%
+
+drug_study$Anxiety <- ifelse(drug_study$ANXDYR=="(0) No (YRANXD=6,89,99)","no","yes")
+drug_study$Depression <- ifelse(drug_study$DEPRSYR=="(0) No (YRDEPRS=6,89,99)","no","yes")
+drug_study$SleepApnea <- ifelse(drug_study$SLPAPYR=="(0) No (YRSLPAP=6,89,99)","no","yes")
+
+drug_study$Anxiety <- as.factor(drug_study$Anxiety)
+drug_study$Depression <- as.factor(drug_study$Depression)
+drug_study$SleepApnea <- as.factor(drug_study$SleepApnea)
+
+#get proportion yes/no for users and non-users for each activity
+tidy_act <- select(.data=drug_study, Anxiety, Depression, SleepApnea, OPIOID) %>%
+    gather(key="Condition",value="HasCondition",-OPIOID)
+tidy_act_illness <- na.omit(tidy_act)
+tidy_act_illness$HasCondition <- as.factor(tidy_act_illness$HasCondition)
+tidy_act_illness$Condition <- as.factor(tidy_act_illness$Condition)
+tidy_act_illness
+
+noAnxiety_noOpioids = nrow(tidy_act_illness[(tidy_act_illness$Condition == "Anxiety" & tidy_act_illness$HasCondition == "no" & tidy_act_illness$OPIOID == "no"),])
+Anxiety_noOpioids = nrow(tidy_act_illness[(tidy_act_illness$Condition == "Anxiety" & tidy_act_illness$HasCondition == "yes" & tidy_act_illness$OPIOID == "no"),])
+noAnxiety_Opioids = nrow(tidy_act_illness[(tidy_act_illness$Condition == "Anxiety" & tidy_act_illness$HasCondition == "no" & tidy_act_illness$OPIOID == "yes"),])
+Anxiety_Opioids = nrow(tidy_act_illness[(tidy_act_illness$Condition == "Anxiety" & tidy_act_illness$HasCondition == "yes" & tidy_act_illness$OPIOID == "yes"),])
+
+noAnxiety_noOpioids = nrow(tidy_act_illness[(tidy_act_illness$Condition == "Anxiety" & tidy_act_illness$HasCondition == "no" & tidy_act_illness$OPIOID == "no"),])
+noAnxiety_noOpioids = nrow(tidy_act_illness[(tidy_act_illness$Condition == "Anxiety" & tidy_act_illness$HasCondition == "no" & tidy_act_illness$OPIOID == "no"),])
+
+#aggregate(x = tidy_act_illness$Condition, by = list(tidy_act_illness$HasCondition), FUN = count)
+# aggregate(HasCondition ~ Condition + OPIOID, data = tidy_act_illness, count)
+
+ggplot(tidy_act_illness, aes(fill=OPIOID, y=HasCondition, x=Condition)) + 
+    geom_bar(position="dodge", stat="identity")
+
+```
+
+```{r}
+opioid_users$Anxiety <- ifelse(opioid_users$ANXDYR=="(0) No (YRANXD=6,89,99)","no","yes")
+opioid_users$Depression <- ifelse(opioid_users$DEPRSYR=="(0) No (YRDEPRS=6,89,99)","no","yes")
+
+opioid_users$Anxiety <- as.factor(opioid_users$Anxiety)
+opioid_users$Depression <- as.factor(opioid_users$Depression)
+
+m1 <- mosaic(Anxiety ~ Sex,
+       data = opioid_users, 
+       direction = c("v", "h"),
+       labeling_args = list(rot_labels = c(0, 0, 0, 0), offset_varnames = c(left = 6), offset_labels = c(left = 2.6)), gp = grid::gpar(fill=c('#CCCCFF','#9966CC')),
+       main = "Sex Breakdown of Opioid Users with Anxiety")
+
+m2 <- mosaic(Depression ~ Sex,
+       data = opioid_users, 
+       direction = c("v", "h"),
+       labeling_args = list(rot_labels = c(0, 0, 0, 0), offset_varnames = c(left = 6), offset_labels = c(left = 2.6)), gp = grid::gpar(fill=c('#CCCCFF','#9966CC')),
+       main = "Sex Breakdown of Opioid Users with Depression")
+
+#par(mfrow=c(1,2))
+gridExtra::grid.arrange(m1, m2,nrow=1)
+#grid.arrange(m1, m2, ncol=2)
+```
+
+
+
+
 
 ## VI. Interactive Component
 
