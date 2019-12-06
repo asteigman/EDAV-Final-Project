@@ -17,21 +17,26 @@ library(plyr)
 
 ## I. Introduction
 
-Over the last few years, the opioid crisis in America has been worsening rapidly and is perhaps finally gaining the public and media awareness it needs The topic is both concerning and fascinating. When people think of drugs, the most obvious, widespread choices are alcohol and marijuana. The flashier ones that may come to mind afterwards include cocaine, LSD, ecstasy, and so on. 
+The opioid crisis in America has been worsening rapidly and is perhaps finally gaining the public and media awareness it needs. Opioids are most commonly prescription pain relievers but also include heroin and synthetic opioids such as fentanyl. The topic is both concerning and fascinating, as opioids that are used most frequently are ones that can be prescribed by doctors, such as oxycodone and hydrocodone, with users at times transitioning to illegal opioids like heroin. 
 
-Opioids, however, are getting more and more common. The National Institute on Drug Abuse found in January 2019 that "more than 130 people in the United States die after overdoing on opioids" every day. Opioids are most commonly prescription pain relievers but also include heroin and synthetic opioids such as fentanyl. The Centers for Disease Control and Prevention has released an estimate that opioid misuse in the US costs $78.5 billion a year in terms of healthcare costs, lost productivity, rehab treatments, and criminal justice activities.
+Opioid usage is getting more and more common. The National Institute on Drug Abuse found in January 2019 that "more than 130 people in the United States die after overdosing on opioids" every day. The Centers for Disease Control and Prevention has released an estimate that opioid misuse in the US costs $78.5 billion a year in terms of healthcare costs, lost productivity, rehab treatments, and criminal justice activities.
 
-An alarming number of doctors have been caught for inappropriate opiod prescription. Moreover, 21 to 29% of chronic pain patients have been found to misuse their prescribed opioids.  8 to 12% may develop an opioid use disorder, and 4 to 6% transition from an opioid prescripton to heroin use. Given these worrisome figures, we chose to explore data regarding the United States drug use and abuse. We are most interested in questions such as:
+*DEFINE NON-MEDICALLY AND TIE IT INTO NEXT PARAGRAPH*
+
+An alarming number of doctors have been caught for inappropriate opioid prescription. Moreover, 21% to 29% of chronic pain patients have been found to misuse their prescribed opioids. 8% to 12% may develop an opioid use disorder, and 4% to 6% transition from an opioid prescripton to heroin use. Given these worrisome figures, which provide part of the basis for *how* people are using opioids, we chose to explore data regarding *who* is using and abusing opioids in the United States. We focused on answering the following questions:
+
 
 RANDOM BRAINSTORM THAT WE CAN PICK AND CHOOSE FROM / ADD TO
-  - What are the interesting trends and rates of opioid abuse within different demographics?
-  - What particular difficulties do youth who abuse opioids face?
-  - Is there are strong relationship between opioid abuse and crime? What interesting depth can income and education add to this relationship?
-  - What trends do we see between opioid abuse and other substance abuse?
+
+  - What are the interesting trends and rates of opioid abuse across different income groups? **
+  - Is there are strong relationship between opioid abuse and crime? What interesting depth can income add to this relationship? **
   - Is crime at all connected with high opioid abuse, and how does this connection compare to crime rates tied to other drugs?
+  - What particular difficulties do youth who abuse opioids face? **
+  - What factors contribute most to whether an individual uses a prescription painkiller non-medically? ** (I was thinking we could try using the interactive part for this)
+  - What trends do we see between opioid abuse and other substance abuse? **
   - The cause of a lot of opioid misuse is physical illness, but what are differences between use, misuse, and abuse?  Are there any ties to mental illness?
   - What are the most common sources of obtaining opioids if not from a medical prescription?
-  - 
+
 
 ## II. Data Sources
 
@@ -56,19 +61,143 @@ We imported our data as a .rda file, which added a new challenge because loading
 ## V. Results
 
 
-# POTENTIALLY REPLACE THIS WITH OPIOID USERS VS FREQ VS HIGHLY FREQ
+
+### Prescription Painkiller Use and Income
+
+We define a "user" as someone who has used any sort of prescription painkiller non-medically at least once in their lives. Just under 15% of respondents are opioid users.
+
 ```{r}
-mosaic(INCOME ~ SEX, 
-       direction=c('v','h'), 
-       labeling_args = list(rot_labels = c(0, 0, 0, 0), 
-                            offset_varnames = c(left = 6), 
-                            offset_labels = c(left = 2.6)),
-       gp = grid::gpar(fill=c('#CCCCFF', '#CC99FF', '#9966CC', '#663399')),
-       main = "Sex and Income of Oxycontin Users",
-       drug_study_demographic,)
+# ANLEVER : EVER USED PAIN RELIEVERS NONMEDICALLY
+opioid_users <- drug_study[!is.na(drug_study$ANLEVER),]
+cat('Percentage of all survey participants who have used prescription pain relievers nonmedically')
+cat('\n')
+cat(nrow(opioid_users)/nrow(drug_study)*100)
+cat('%')
 ```
 
-Above we can see that similar proportions of females and males have used Oxycontin non-medically (slightly more males than females). However, we do see some differences of use within gender when we vary income level. For both genders, we see that the highest proportion of users has an income of between $20,000 and $49,000. For females, usage drops off a bit after that (the majority of female users tend to be more poor). On the other hand, our male respondents with the highest income made up a larger portion of male users. When we look at income alone, we see a similar trend to male usage (about 30% of users make <$20,000 per year, 35% between $20,000 and $49,999, 15% between $50,000 and $74,999, and 20% make >$75,000 per year). 
+
+Now, we consider respondents' incomes within our sample. About 30% of users make <$20,000 per year, 35% between $20,000 and $49,999, 15% between $50,000 and $74,999, and 20% make >$75,000 per year. We wanted to add another dimension to this and get more insight on whether certain combinations of groups, also considering gender, were using prescription painkillers. To see how our drug users vary with regard to income and sex, we created the plot below. This plot only includes opioid users, making it easy to see the breakdown. 
+
+```{r}
+load("35509-0001-Data.rda")
+drug_study <- da35509.0001
+
+# clean data for graph
+opioid_users$Sex <- ifelse(opioid_users$IRSEX == "(1) Male","Male","Female")
+opioid_users$INCOME <- as.character(opioid_users$INCOME)
+
+opioid_users$INCOME = revalue(opioid_users$INCOME, c("(1) Less than $20,000"="<$20,000", "(2) $20,000 - $49,999"="$20,000 - $49,999", "(3) $50,000 - $74,999"="$50,000 - $74,999", "(4) $75,000 or More"=">$75,000"))
+
+opioid_users$Sex <- as.factor(opioid_users$Sex)
+opioid_users$Income_Brackets <- as.factor(opioid_users$INCOME)
+opioid_users$Income <- fct_relevel(opioid_users$Income_Brackets,">$75,000",after=3)
+mosaic(Income ~ Sex,
+       data = opioid_users, 
+       direction = c("v", "h"),
+       labeling_args = list(rot_labels = c(0, 0, 0, 0), offset_varnames = c(left = 6), offset_labels = c(left = 2.6)), gp = grid::gpar(fill=c('#CCCCFF', '#CC99FF', '#9966CC', '#663399')),
+       main = "Sex and Income of Opioid Users")
+```
+
+Above we can see that similar proportions of females and males have used prescription painkillers non-medically (slightly more males than females). However, we do see some differences of use within gender when we vary income level. For both genders, we see that the highest proportion of users has an income of between $20,000 and $49,000. For females, usage drops off a bit after that (the majority of female users tend to be more poor). On the other hand, our male respondents with the highest income made up a larger portion of male users. When we look at income alone, we see a similar trend to male usage (about 30% of users make <$20,000 per year, 35% between $20,000 and $49,999, 15% between $50,000 and $74,999, and 20% make >$75,000 per year). 
+
+Above we can see that nearly identical proportions of males and females have used prescription painkillers non-medically. However, we do see some differences of use within gender when we vary income level. 
+
+[[For both genders, we see that the highest proportion of users has an income of between $20,000 and $49,000. For females, usage drops off a bit after that (the majority of female users tend to be more poor). On the other hand, our male respondents with the highest income made up a larger portion of male users. The breakdown of users by income bracket within the male sex is more similar to the breakdown by looking at income alone, which we described above.]] 
+
+# A BIT DIFFICULT TO UNDERSTAND BOTH OUR ANALYSES ^^^ LETS REWORD
+
+The above graph only considers whether a respondent has used a prescription painkiler non-medically before, but to dig into the data more, we chose to look at the frequency of use, this time focusing only on income. Looking at the frequency can give us a better idea of whether a respondent was abusing an opioid recreationally or whether a user may have been taking the drug for a prolonged period of time for a reason they viewed as necessary, like chronic pain. To be consistent with many previous opioid investigations, we define frequent users as those with 100 or more days of nonmedical opioid use in the past year and highly frequent as those with 200 or more days of nonmedical use. [[In our sample, only 2.6% of users can be classified as highly frequent users, whereas 67.3% said they used prescription painkillers non-medically on a frequent basis and the remaining 30.1% reporting infrequent use.]] 
+# should we show this using what i did in data cleaning and exploration so that it's proven?
+
+```{r}
+opioid_users <- opioid_users %>% mutate(
+  frequency = case_when(
+    opioid_users$ANLYRTOT < 100 ~ 'infrequent',
+    opioid_users$ANLYRTOT >= 200 ~ 'highly frequent',
+    TRUE ~ 'frequent'
+  )
+)
+
+opioid_users$frequency <- factor(opioid_users$frequency, levels = c("highly frequent", "frequent", "infrequent"))
+
+ggplot(opioid_users, aes(fct_rev(Income))) + 
+  geom_bar(aes(fill=frequency), position="fill") + 
+  labs(title="Opioid Use Frequency Based on Income",
+        x="Income Bracket",
+        y="Proportion",
+        fill='Frequency of Use') +
+  coord_flip()
+
+# WE SHOULD FLIP LEGEND ACCORDING TO END OF COLOR PPT SHE SENT US
+```
+Across all income groups, we see relatively similar frequencies of opioid use. A slightly larger proportion of users earning more than $75,000 anually or earning between $20,000 and $49,999 anually use opioids non-medically on a frequent basis. Overall though, the breakdown does not deviate much from the frequency of use not accounting for income. This is interesting because it provides evidence for the argument that income may not be a barrier to getting the drug for recreational (frequent or highly frequent, versus infrequent which is less likely to be, but still can be, recreational) use. 
+
+While it is difficult to determine the actual price of purchasing prescription painkillers due to the fact that they are often obtained on the "black market," we used StreetRx, a program that allows people to anonymously submit how much they paid for illegal drugs, as an estimate. According to StreetRx, the average price per milligram of oxycodone, one of the most commonly used prescription painkillers, is $1.40. Based on this, a user would pay around $15 per pill/dose. For a frequent user - which is what the majority of our sample can be classified as - this would mean he spends, on average, between $1,500 and $3,000 per year on prescription painkillers. This is not cheap - especially for someone making $20,000 per year, this could mean 7.5% to 15% of income would be going to drug use. Thus, it is interesting to see this does not necessarily stop a user from using the drug on a frequent basis.
+
+Finally, we look at the relationship between income and crime, specifically whether or not prescription painkiller non-medical users have been arrested, and compare this result to non-users.
+
+
+```{r, warning=FALSE, fig.height=6,fig.width=12}
+#suppress warning message about the 19 NAs being removed to construct the charts
+opioid_users$BOOKED = revalue(opioid_users$BOOKED, c("(1) Yes"="Yes", "(2) No"="No", "(3) Yes LOGICALLY ASSIGNED"="Yes"))
+
+#clean overall dataset
+drug_study$BOOKED = revalue(drug_study$BOOKED, c("(1) Yes"="Yes", "(2) No"="No", "(3) Yes LOGICALLY ASSIGNED"="Yes"))
+
+#make and arrange plots
+users_plot <- ggplot(opioid_users[!is.na(opioid_users$BOOKED),]) +
+  aes(x = Income, fill = fct_rev(BOOKED)) +
+  labs(fill = "Arrested", y = "Proportion of Arrests",x="Income",title="Proportion of Arrests by Income for Prescription Painkiller Users") +
+  geom_bar(position = "fill") + 
+  theme(plot.title = element_text(hjust = 0.5))
+
+nonusers_plot <- ggplot(drug_study[!is.na(drug_study$BOOKED) & is.na(drug_study$ANLEVER),]) +
+  aes(x = INCOME, fill = fct_rev(BOOKED)) +
+  labs(fill = "Arrested", y = "Proportion of Arrests",x="Income",title="Proportion of Arrests by Income for Prescription Painkiller Non-Users") +
+  geom_bar(position = "fill") + 
+  theme(plot.title = element_text(hjust = 0.5))
+
+grid.arrange(users_plot,nonusers_plot, ncol=2)
+```
+*font needs to be bigger/remove legend on left graph*
+Overall, just about 1/3 of users have been arrested and booked for a crime. Broken down by income bracket, we can see that as income increases, the proportion of users who have been arrested decreases. For the poorest group, 39.7% of users have been arrested, and for the wealthiest group, 27.4% of users have been arrested. For non-users, the story is different in some ways and similar in others - overall, the proportion of non-users who have been arrested is 11%, which is much lower than what we observed overall for users. We still see that as income increases, the proportion of non-users who have been arrested decreases. For the poorest group, 15% of users have been arrested, and for the wealthiest group, only 7.5% of users have been arrested.
+
+*more on crime?*
+
+
+### Youth Prescription Painkiller Use
+
+Now, we move on to our questions about painkiller use within youths. First, we examine whether or not a respondent has used a prescription painkiller based on his or her age group. We have granular information for younger ages, but above the age of 35 years old, we cannot differentiate between respondents. We include all ages here for completeness and comparison, but conveniently the ages we have the most information about are the ages we are most interested in.
+
+```{r}
+#clean age
+drug_study$CATAG7 = revalue(drug_study$CATAG7, c("(1) 12-13 Years Old"="12-13", "(2) 14-15 Years Old"="14-15", "(3) 16-17 Years Old"="16-17", "(4) 18-20 Years Old"="18-20", "(5) 21-25 Years Old"="21-25", "(6) 26-34 Years Old"="26-34", "(7) 35 or Older"="35+"))
+drug_study$CATAG7 <- factor(drug_study$CATAG7, levels = c("35+", "26-34", "21-25", "18-20", "16-17", "14-15", "12-13"))
+
+#use variable
+drug_study$OPIOID <- ifelse(!is.na(drug_study$ANLEVER),"yes","no")
+drug_study$OPIOID <- as.factor(drug_study$OPIOID)
+
+
+ggplot(drug_study, aes(CATAG7)) + 
+  geom_bar(aes(fill=OPIOID), position="fill") + 
+  labs(title="Opioid Use Based on Age",
+        x="Age Group",
+        y="Proportion",
+        fill='Used Opioid') +
+  coord_flip() + 
+  theme(plot.title = element_text(hjust = 0.5))
+
+# AGAIN FLIP LEGEND
+```
+
+We can see that as age increases, a user is more likely to have used a prescription painkiller non-medically, but this levels off at the ages of 21-34 and even decreases for the oldest group. It is obvious and intuitive that there would be a larger proportion of people who have tried opioids as age increases because they have had longer to try these drugs, and it is more rare to try a "harder" drug (substances like opioids and stimulants as opposed to marijuana and alcohol) at a younger age. What is more interesting, though for this chart, is the older demographic: if an individual has not tried taking a prescription painkiller non-medically by their early 20's, they are perhaps less likely to ever try them as they get older. Additionally, the fact that the oldest population is the least likely to have used opioids non-medically suggets that this [[sort of usage has more recently become more popular and more of an issue in the United States.]] 
+#slightly unclear?  what kind of usage?  just non-medical usage?
+
+*we could think about adding a histogram with age of first use here, but i think we only have that info for oxy so i'm not sure if it makes sense to*
+
+For our youth population as a whole (N = 17,736; ages 12-17), approximately 7.6% of respondents have tried an opioid for non-medical purposes, which is about half of the rate we found overall in the survey. We proceed by examining how this group of users may differ from their peers - first, we look different types of activities that youth respondents participated in. Participation in activities is interesting to look at because it can give us insight to how engaged a youth is - we would expect youths who are more engaged to be less likely to use opioids (and other drugs) non-medically.
+
 ## VI. Interactive Component
 
 ## VII. Conclusion
