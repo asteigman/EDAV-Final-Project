@@ -1,0 +1,86 @@
+---
+title: "Cleaning"
+author: "Suman Tripathy, Amanda Steigman"
+date: "12/7/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(vcd)
+library(tidyverse)
+library(forcats)
+library(gridExtra)
+library(gridGraphics)
+library(scales)
+library(mi)
+library(dplyr)
+library(plyr)
+```
+
+```{r}
+# Load data
+load("35509-0001-Data.rda")
+drug_study <- da35509.0001
+
+# Begin cleaning 
+
+# Select out columns we need
+relevant_cols <- c('ANLEVER', 'IRSEX', 'INCOME', 'ANLYRTOT', 'BOOKED', 'CATAG7', 'YESCHACT', 'YECOMACT', 'YEFAIACT', 'YEOTHACT', 'ANXDYR', 'DEPRSYR', 'SLPAPYR', 'MJEVER', 'STMEVER')
+drug_study <- drug_study[,colnames(drug_study) %in% relevant_cols]
+
+# Sex variable
+drug_study$Sex <- ifelse(drug_study$IRSEX == "(1) Male","Male","Female")
+drug_study$Sex <- as.factor(drug_study$Sex)
+
+# Income variable
+drug_study$INCOME <- as.character(drug_study$INCOME)
+drug_study$INCOME = revalue(drug_study$INCOME, c("(1) Less than $20,000"="<$20,000", "(2) $20,000 - $49,999"="$20,000 - $49,999", "(3) $50,000 - $74,999"="$50,000 - $74,999", "(4) $75,000 or More"=">$75,000"))
+drug_study$INCOME <- as.factor(drug_study$INCOME)
+drug_study$Income <- fct_relevel(drug_study$INCOME,">$75,000",after=3)
+
+# Booked variable
+drug_study$Booked = revalue(drug_study$BOOKED, c("(1) Yes"="Yes", "(2) No"="No", "(3) Yes LOGICALLY ASSIGNED"="Yes"))
+
+# Age variable
+drug_study$CATAG7 = revalue(drug_study$CATAG7, c("(1) 12-13 Years Old"="12-13", "(2) 14-15 Years Old"="14-15", "(3) 16-17 Years Old"="16-17", "(4) 18-20 Years Old"="18-20", "(5) 21-25 Years Old"="21-25", "(6) 26-34 Years Old"="26-34", "(7) 35 or Older"="35+"))
+drug_study$Age <- factor(drug_study$CATAG7, levels = c("35+", "26-34", "21-25", "18-20", "16-17", "14-15", "12-13"))
+
+# Opioid user variable
+drug_study$OPIOID <- ifelse(!is.na(drug_study$ANLEVER),"yes","no")
+drug_study$Opioid <- as.factor(drug_study$OPIOID)
+
+# Youth variables
+drug_study$School <- ifelse(drug_study$YESCHACT=="(0) None","no","yes")
+drug_study$School <- as.factor(drug_study$School)
+
+drug_study$Community <- ifelse(drug_study$YECOMACT=="(0) None","no","yes")
+drug_study$Community <- as.factor(drug_study$Community)
+
+drug_study$Faith <- ifelse(drug_study$YEFAIACT=="(0) None","no","yes")
+drug_study$Faith <- as.factor(drug_study$Faith)
+
+drug_study$Other <- ifelse(drug_study$YEOTHACT=="(0) None","no","yes")
+drug_study$Other <- as.factor(drug_study$Other)
+
+# Other drug variables
+drug_study$Marijuana <- ifelse(drug_study$MJEVER=="(1) Yes","yes","no")
+drug_study$Marijuana <- as.factor(drug_study$Marijuana)
+
+drug_study$Stimulant <- ifelse(!is.na(drug_study$STMEVER),"yes","no")
+drug_study$Stimulant <- as.factor(drug_study$Stimulant)
+
+# Illness variables
+drug_study$Anxiety <- ifelse(drug_study$ANXDYR=="(0) No (YRANXD=6,89,99)","no","yes")
+drug_study$Anxiety <- as.factor(drug_study$Anxiety)
+
+drug_study$Depression <- ifelse(drug_study$DEPRSYR=="(0) No (YRDEPRS=6,89,99)","no","yes")
+drug_study$Depression <- as.factor(drug_study$Depression)
+
+drug_study$SleepApnea <- ifelse(drug_study$SLPAPYR=="(0) No (YRSLPAP=6,89,99)","no","yes")
+drug_study$SleepApnea <- as.factor(drug_study$SleepApnea)
+
+write.csv(drug_study, 'cleaned_drug_study.csv')
+```
+
