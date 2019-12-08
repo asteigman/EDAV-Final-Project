@@ -14,6 +14,7 @@ library(forcats)
 library(gridExtra)
 library(gridGraphics)
 library(scales)
+library(ggmosaic)
 library(mi)
 library(dplyr)
 library(plyr)
@@ -60,18 +61,23 @@ drug_study <- read.csv(file="cleaned_drug_study.csv", header=TRUE, sep=",")
 
 # Users who have taken opioids non-medically
 opioid_users <- drug_study[drug_study$Opioid=="yes",]
+non_users <- drug_study[drug_study$Opioid=="no",]
 
 # Youth who have taken opioids non-medically
 drug_study_youth <- drug_study[drug_study$Age=="12-13"|drug_study$Age=="14-15"|drug_study$Age=="16-17",]
 drug_study_youth_plot <- select(drug_study_youth,Opioid,Marijuana,Stimulant)
 
-# Add in some basic mutations and cleaning 
+# Add in some more basic mutations and cleaning 
 opioid_users <- opioid_users %>% mutate(
   frequency = case_when(
     opioid_users$ANLYRTOT < 100 ~ 'infrequent',
     opioid_users$ANLYRTOT >= 200 ~ 'highly frequent',
     TRUE ~ 'frequent'))
-opioid_users$frequency <- factor(opioid_users$frequency, levels = c("highly frequent", "frequent", "infrequent"))
+opioid_users$frequency <- factor(opioid_users$frequency, levels = c("infrequent", "frequent", "highly frequent"))
+opioid_users$Income <- as.factor(opioid_users$Income)
+opioid_users$Income <- fct_relevel(opioid_users$Income,">$75,000",after=3)
+drug_study$Income <- as.factor(drug_study$Income)
+drug_study$Income <- fct_relevel(drug_study$Income,">$75,000",after=3)
 
 ```
 
@@ -120,20 +126,24 @@ mosaic(Income ~ Sex,
        main = "Sex and Income of Opioid Users")
 ```
 
-Above we can see that similar proportions of females and males have used prescription painkillers non-medically (slightly more males than females). However, we do see some differences of use within gender when we vary income level. For both genders, we see that the highest proportion of users has an income of between $20,000 and $49,000. For females, usage drops off a bit after that (the majority of female users tend to be more poor). On the other hand, our male respondents with the highest income made up a larger portion of male users. When we look at income alone, we see a similar trend to male usage (about 30% of users make <$20,000 per year, 35% between $20,000 and $49,999, 15% between $50,000 and $74,999, and 20% make >$75,000 per year). 
+Above we can see that nearly identical proportions of females and males have used prescription painkillers non-medically (slightly more males than females). However, we do see some differences of use within gender when we vary income level. For both genders, we see that the highest proportion of users has an income of between $20,000 and $49,000. For females, usage drops off a bit after that (the majority of female users tend to be more poor). On the other hand, our male respondents with the highest income made up a larger portion of male users as compared to the female proportions. However, for both groups the smallest proportion of opioid users are in the income bracket of $50,000 - $74,999, which is somewhat of an anomaly since it seems more reasonable that either the richest or poorest income groups would be abusing opioids the most, either due to more life struggles or due to more money to spend.  
+#is this last sentence problematic to write?? lol it's just my opinion
 
-Above we can see that nearly identical proportions of males and females have used prescription painkillers non-medically. However, we do see some differences of use within gender when we vary income level. 
+The above graph only considers whether a respondent has used a prescription painkiler non-medically before, but to dig into the data more, we chose to look at the frequency of use, this time focusing only on income. Looking at the frequency can give us a better idea of whether a respondent was abusing an opioid recreationally or whether a user may have been taking the drug for a prolonged period of time for a reason they viewed as necessary, like chronic pain. 
 
-[[For both genders, we see that the highest proportion of users has an income of between $20,000 and $49,000. For females, usage drops off a bit after that (the majority of female users tend to be more poor). On the other hand, our male respondents with the highest income made up a larger portion of male users. The breakdown of users by income bracket within the male sex is more similar to the breakdown by looking at income alone, which we described above.]] 
+```{r, warning=FALSE, fig.height=4, fig.width=10}
+ggplot(data = opioid_users, mapping = aes(ANLYRTOT)) + 
+  geom_histogram(binwidth = 10, fill="#663399") + 
+  labs(title = "Total Days Using Non-Medical Pain Reliever in Past Year", x = "Number of Days", y = "Count") + 
+  scale_x_continuous(breaks=seq(0,365,20))
+```
 
-# A BIT DIFFICULT TO UNDERSTAND BOTH OUR ANALYSES ^^^ LETS REWORD
-
-The above graph only considers whether a respondent has used a prescription painkiler non-medically before, but to dig into the data more, we chose to look at the frequency of use, this time focusing only on income. Looking at the frequency can give us a better idea of whether a respondent was abusing an opioid recreationally or whether a user may have been taking the drug for a prolonged period of time for a reason they viewed as necessary, like chronic pain. To be consistent with many previous opioid investigations, we define frequent users as those with 100 or more days of nonmedical opioid use in the past year and highly frequent as those with 200 or more days of nonmedical use. [[In our sample, only 2.6% of users can be classified as highly frequent users, whereas 67.3% said they used prescription painkillers non-medically on a frequent basis and the remaining 30.1% reporting infrequent use.]]  
-# should we show this using what i did in data cleaning and exploration so that it's proven? also maybe let's do a historgram here just to have some non-categorical data type of graphs ?? 
+The histogram above is unimodal showing that most opioid misusers have taken the opioid less than ten times a year. To be consistent with many previous opioid investigations, we define frequent users as those with 100 or more days of nonmedical opioid use in the past year and highly frequent as those with 200 or more days of nonmedical use. In our sample, only 2.6% of users can be classified as highly frequent users, whereas 67.3% said they used prescription painkillers non-medically on a frequent basis and the remaining 30.1% reporting infrequent use.  
+# hmm the frequency column in the dataframe supports this but doesnt this seem completely false based on how the histogram looks?? im confused...
 
 ```{r}
 ggplot(opioid_users, aes(fct_rev(Income))) + 
-  geom_bar(aes(fill=frequency), position="fill") + 
+  geom_bar(aes(fill=fct_rev(frequency)), position="fill") + 
   labs(title="Opioid Use Frequency Based on Income",
         x="Income Bracket",
         y="Proportion",
@@ -146,9 +156,7 @@ Across all income groups, we see relatively similar frequencies of opioid use. A
 
 While it is difficult to determine the actual price of purchasing prescription painkillers due to the fact that they are often obtained on the "black market," we used StreetRx, a program that allows people to anonymously submit how much they paid for illegal drugs, as an estimate. According to StreetRx, the average price per milligram of oxycodone, one of the most commonly used prescription painkillers, is $1.40. Based on this, a user would pay around $15 per pill/dose. For a frequent user - which is what the majority of our sample can be classified as - this would mean he spends, on average, between $1,500 and $3,000 per year on prescription painkillers. This is not cheap - especially for someone making $20,000 per year, this could mean 7.5% to 15% of income would be going to drug use. Thus, it is interesting to see this does not necessarily stop a user from using the drug on a frequent basis.
 
-Finally, we look at the relationship between income and crime, specifically whether or not prescription painkiller non-medical users have been arrested, and compare this result to non-users. 
-# maybe rephrase "whether or not they have been arrested" - sounds too 'one and done' type of thing
-
+Finally, we look at the relationship between income and crime, specifically focusing on arrest rates for non-medical opioid users and comparing this result to non-users. 
 
 ```{r, warning=FALSE, fig.height=6,fig.width=12}
 #suppress warning message about the 19 NAs being removed to construct the charts
@@ -169,9 +177,98 @@ nonusers_plot <- ggplot(drug_study[!is.na(drug_study$Booked) & drug_study$Opioid
 grid.arrange(users_plot, nonusers_plot, ncol=2)
 ```
 *font needs to be bigger/remove legend on left graph*
-Overall, just about 1/3 of users have been arrested and booked for a crime. Broken down by income bracket, we can see that as income increases, the proportion of users who have been arrested decreases. For the poorest group, 39.7% of users have been arrested, and for the wealthiest group, 27.4% of users have been arrested. For non-users, the story is different in some ways and similar in others - overall, the proportion of non-users who have been arrested is 11%, which is much lower than what we observed overall for users. We still see that as income increases, the proportion of non-users who have been arrested decreases. For the poorest group, 15% of users have been arrested, and for the wealthiest group, only 7.5% of users have been arrested.
+Overall, just about 1/3 of opioid users have been arrested and booked for a crime. Broken down by income bracket, we can see that as income increases, the proportion of users who have been arrested decreases. For the poorest group, 39.7% of users have been arrested, and for the wealthiest group, 27.4% of users have been arrested. For non-users, the story is different in some ways and similar in others - overall, the proportion of non-users who have been arrested is 11%, which is much lower than what we observed overall for users. We still see that as income increases, the proportion of non-users who have been arrested decreases. For the poorest group, 15% of users have been arrested, and for the wealthiest group, only 7.5% of users have been arrested. Crime proves to have an interesting relationship with opioid use, so we now explore it further by breaking down arrests across various opioid usage frequencies.
 
-*more on crime?*
+```{r}
+p = ggplot(data = opioid_users[!is.na(opioid_users$Booked),], mapping = aes(Booked)) + 
+  geom_bar(aes(y = ..prop.., group = 1), fill = c("#F8766D", "#00BFC4", "#F8766D", "#00BFC4", "#F8766D", "#00BFC4")) + 
+  facet_wrap(~frequency) +
+  labs(title = "Ever Been Arrested and Booked for Breaking Law", x = "Been Booked", y = "Proportion")  
+show(p)
+```
+For both infrequent and frequent opioid users, we see similar approximate ratios of about 70% of users having been booked and 30% never having been booked. However, for highly frequent users, we see a big spike in the number of arrests in that about half of all users have been booked before and half have not. This finding is not especially shocking, but it interesting to see such a sharp disparity between frequent and highly frequent opioid users in arrest rates and nearly no difference in arrest rates between infrequent and frequent users. This may lead us to believe that highly frequent users may have particularly serious issues in their lives that lead to both high opioid abuse and stronger likelihood of committing crimes. Mental health is one potential cause that we choose to investigate.
+
+
+### Physical and Mental Health's Relationship to Opioid Abuse
+
+A great deal of opioid abusers claim that they use opioids to self-medicate - for chronic pain, anxiety, depression, insomnia, or another condition. Luckily, the NSDUH survey also includes questions about various health conditions that we can explore in relation to opioid use. A lot of the data is for specific illnesses such as Tuberculosis and Asthma, which don't have strong ties to painkiller use, so instead we specifically look at categories that may be more tied to misuse - anxiety and depression.
+
+
+```{r, warning=FALSE, fig.width=10}
+opioid_users$Anxiety <- factor(opioid_users$Anxiety, levels = c("no", "yes"))
+
+p1 <- ggplot(non_users[!is.na(non_users$Anxiety),], mapping = aes(Anxiety)) +
+  geom_bar(aes(y = ..prop.., group = 1), fill = c("#F8766D", "#00BFC4")) +
+  labs(title = "Non-Opioid Users' Anxiety Rates", x = "Has Anxiety", y = "Proportion")
+
+p2 <- ggplot(opioid_users[!is.na(opioid_users$Anxiety),], mapping = aes(Anxiety)) +
+  geom_bar(aes(y = ..prop.., group = 1), fill = c("#F8766D", "#00BFC4")) +
+  labs(title = "Opioid Users' Anxiety Rates", x = "Has Anxiety", y = "Proportion")
+
+p3 <- ggplot(non_users[!is.na(non_users$Depression),], mapping = aes(Depression)) +
+  geom_bar(aes(y = ..prop.., group = 1), fill = c("#F8766D", "#00BFC4")) +
+  labs(title = "Non-Opioid Users' Depression Rates", x = "Has Depression", y = "Proportion")
+
+p4 <- ggplot(opioid_users[!is.na(opioid_users$Depression),], mapping = aes(Depression)) +
+  geom_bar(aes(y = ..prop.., group = 1), fill = c("#F8766D", "#00BFC4")) +
+  labs(title = "Opioid Users' Depression Rates", x = "Has Depression", y = "Proportion")
+
+grid.arrange(p1, p2, p3, p4, nrow=2, ncol=2)
+
+```
+
+Here, we compare anxiety levels across opioid users and non-opioid users.  Firstly, we note that the percentages in each graph do not add up to 100% due to NA responses. More interestingly, however, we see a substantial difference between opioid users' and non-opioid users' anxiaty rates. Only about 5.06% of non-opioid users report having anxiety whereas 13.40% of opioid users report anxiety. We see extremely similar results when comparing depression rates between non-users and users as well. 5.82% of non-users indicated that they had depression as compared to the 13.45% of opioid users with depression.  
+# SO DUMB BUT I WANNA FIND P VALUES FOR THESE AND DONT KNOW HOW LOLOL
+
+To continue gaining insights about what kind of opioid users face these mental health issues that may be tied to their painkiller misuse, we explore some extra factors like gender, age, and frequency of use.
+
+```{r, fig.width=11, fig.height=4}
+opioid_users$Anxiety <- factor(opioid_users$Anxiety, levels = c("yes", "no"))
+opioid_users$Depression <- factor(opioid_users$Depression, levels = c("yes", "no"))
+
+m1 <-  ggplot(data = opioid_users) +
+   geom_mosaic(aes(x = product(Anxiety, Sex), fill=Anxiety), na.rm=TRUE, show.legend = FALSE) +
+   labs(x="Sex", y="Has Anxiety", title='Gender Breakdown of Opioid Users with Anxiety')
+
+m2 <-  ggplot(data = opioid_users) +
+   geom_mosaic(aes(x = product(Depression, Sex), fill=Depression), na.rm=TRUE, show.legend = FALSE) +
+   labs(x="Sex", y="Has Depression", title='Gender Breakdown of Opioid Users with Depression')
+
+grid.arrange(m1, m2, ncol=2)
+
+p1 <-  ggplot(data = opioid_users) +
+   geom_mosaic(aes(x = product(Anxiety, frequency), fill=Anxiety), na.rm=TRUE, show.legend = FALSE) +
+   labs(x="Frequency of Opioid Use", y="Has Anxiety", title='Frequency of Use Breakdown for Opioid Users with Anxiety')
+
+p2 <-  ggplot(data = opioid_users) +
+   geom_mosaic(aes(x = product(Depression, frequency), fill=Depression), na.rm=TRUE, show.legend = FALSE) +
+   labs(x="Frequency of Opioid Use", y="Has Depression", title='Frequency of Use Breakdown for Opioid Users with Depression')
+
+grid.arrange(p1, p2, ncol=2)
+
+s1 <-  ggplot(data = opioid_users) +
+   geom_mosaic(aes(x = product(Anxiety, Age), fill=Anxiety), na.rm=TRUE, show.legend = FALSE) +
+   labs(x="Age", y="Has Anxiety", title='Age Breakdown of Opioid Users with Anxiety')
+
+s2 <-  ggplot(data = opioid_users) +
+   geom_mosaic(aes(x = product(Depression, Age), fill=Depression), na.rm=TRUE, show.legend = FALSE) +
+   labs(x="Age", y="Has Depression", title='Age Breakdown of Opioid Users with Depression')
+
+grid.arrange(s1, s2, ncol=2)
+```
+
+# GENDER NOT THAT INTERESTING? 
+The mosaic plots above provide some interesting depth to our exploration of opioid users dealing with anxiety and depression. We see very clearly that women are nearly twice as likely as men to experience anxiety and depression, which is a well-studied topic not necessarily tied to opioid use. The Anxiety and Depression Association of America assets that women are twice as likely to have anxiety as men, and the most common disorder to co-occur with Anxiety is depression. 
+
+# FREQ OF USE P INTERESTING? 
+The frequency of use breakdown shows some curious results. Highly frequent opioid users are the most likely to have anxiety and depression. There could be a variety of reasons for this finding such as taking opioids regularly may be used to "cope" with these disorders. More likely, however, is a hidden underlying variable such as chronic illness that may be correlate to anxiety and depression as well as highly frequent opioid use. The Harvard Women's Health Watch found that people with chronic respiratory disorders have a higher likelihood of developing anxiety disorders, and worryingly also asserted that "anxiety is a cause for non-compliance with medical treatment." This could either mean not regularly keeping up with medications and self-care or more relevant to our analysis, abusing prescribed painkiller medications. Unfortunately, the NSDUH data does not provide very much data on chronic conditions, so these interesting questions could only be further researched with an adjacent data set.  
+
+This frequency of use mosaic plot also displays that infrequent users are more likely to have anxiety and depression as compared to frequent users. This seems to contradict the idea of using painkillers as a regular "coping" mechanism for mental health disorders and is therefore a relatively unexpected observation. Again, we must consider that underlying variables may have these visible results.  
+
+# AGE KINDA INTERESTING?
+Lastly, we explore anxiety and depression rates in opioid users broken down by age groups. As we transition from younger to older users, we see a general trend of increasing likelihood of anxiety and depression, meaning the younger opioid users have the lowest proportion of anxiety and depression while the older opioid users have the highest. The Anxiety and Depression Associate of America reaffirms these results by providing statistics that one in eight (12.5%) children are affected by anxiety disorders, which often co-occur with depression, where as 18.1% of the adult population in the US are prone to anxiety disorders. 
+
+This leads to the takeaway that youth opioid misuse is less tied to anxiety and depression than adult misuse. As a result, there must be different causes for youth misuse such as social environment, extracurriculars, peer pressure, and more. We go on to explore the youth demographic in more depth in the next section.
 
 
 ### Youth Prescription Painkiller Use
@@ -193,8 +290,7 @@ ggplot(drug_study, aes(Age)) +
 # AGAIN FLIP LEGEND
 ```
 
-We can see that as age increases, a user is more likely to have used a prescription painkiller non-medically, but this levels off at the ages of 21-34 and even decreases for the oldest group. It is obvious and intuitive that there would be a larger proportion of people who have tried opioids as age increases because they have had longer to try these drugs, and it is more rare to try a "harder" drug (substances like opioids and stimulants as opposed to marijuana and alcohol) at a younger age. What is more interesting, though for this chart, is the older demographic: if an individual has not tried taking a prescription painkiller non-medically by their early 20's, they are perhaps less likely to ever try them as they get older. Additionally, the fact that the oldest population is the least likely to have used opioids non-medically suggets that this [[sort of usage has more recently become more popular and more of an issue in the United States.]] 
-#slightly unclear?  what kind of usage?  just non-medical usage?
+We can see that as age increases, a user is more likely to have used a prescription painkiller non-medically, but this levels off at the ages of 21-34 and even decreases for the oldest group. It is obvious and intuitive that there would be a larger proportion of people who have tried opioids as age increases because they have had longer to try these drugs, and it is more rare to try a "harder" drug (substances like opioids and stimulants as opposed to marijuana and alcohol) at a younger age. What is more interesting, though for this chart, is the older demographic: if an individual has not tried taking a prescription painkiller non-medically by their early 20's, they are perhaps less likely to ever try them as they get older. Additionally, the fact that the oldest population is the least likely to have used opioids non-medically suggets that this opioid misues has become more popular recently and more of an issue in the United States. It implies that perhaps there is some level of youth "hype" over the drug that leads to higher use in these age groups. 
 
 *we could think about adding a histogram with age of first use here, but i think we only have that info for oxy so i'm not sure if it makes sense to*
 
@@ -257,67 +353,6 @@ Among youth, only around 2% have reported trying a stimulant at least once. The 
 
 
 *need to come back and clean these eventually*
-
-### Physical and Mental Health's Relationship to Opioid Abuse
-
-A great deal of opioid abusers claim that they use opioids to self-medicate, either for chronic pain, anxiety, or insomnia. (should i cite the article??) Luckily, the NSDUH survey also included questions about various physical and mental health conditions that we can explore in relation to opioid use.
-
-```{r}
-summary(opioid_users$ANXDYR) # 13.4% of opioid users have anxiety
-summary(drug_study$ANXDYR)  # 6.3 % of all people have anxiety 
-
-summary(opioid_users$DEPRSYR) # 13.5% of opioid users have depression
-summary(drug_study$DEPRSYR) # 6.9% of all people have depression
-
-summary(opioid_users$SLPAPYR) #2.26%
-summary(drug_study$SLPAPYR) # 1.7%
-
-
-#get proportion yes/no for users and non-users for each activity
-tidy_act <- select(.data=drug_study, Anxiety, Depression, SleepApnea, Opioid) %>%
-    gather(key="Condition",value="HasCondition",-Opioid)
-tidy_act_illness <- na.omit(tidy_act)
-tidy_act_illness$HasCondition <- as.factor(tidy_act_illness$HasCondition)
-tidy_act_illness$Condition <- as.factor(tidy_act_illness$Condition)
-tidy_act_illness
-
-noAnxiety_noOpioids = nrow(tidy_act_illness[(tidy_act_illness$Condition == "Anxiety" & tidy_act_illness$HasCondition == "no" & tidy_act_illness$Opioid == "no"),])
-Anxiety_noOpioids = nrow(tidy_act_illness[(tidy_act_illness$Condition == "Anxiety" & tidy_act_illness$HasCondition == "yes" & tidy_act_illness$Opioid == "no"),])
-noAnxiety_Opioids = nrow(tidy_act_illness[(tidy_act_illness$Condition == "Anxiety" & tidy_act_illness$HasCondition == "no" & tidy_act_illness$Opioid == "yes"),])
-Anxiety_Opioids = nrow(tidy_act_illness[(tidy_act_illness$Condition == "Anxiety" & tidy_act_illness$HasCondition == "yes" & tidy_act_illness$Opioid == "yes"),])
-
-noAnxiety_noOpioids = nrow(tidy_act_illness[(tidy_act_illness$Condition == "Anxiety" & tidy_act_illness$HasCondition == "no" & tidy_act_illness$Opioid == "no"),])
-noAnxiety_noOpioids = nrow(tidy_act_illness[(tidy_act_illness$Condition == "Anxiety" & tidy_act_illness$HasCondition == "no" & tidy_act_illness$Opioid == "no"),])
-
-#aggregate(x = tidy_act_illness$Condition, by = list(tidy_act_illness$HasCondition), FUN = count)
-# aggregate(HasCondition ~ Condition + Opioid, data = tidy_act_illness, count)
-
-ggplot(tidy_act_illness, aes(fill=Opioid, y=HasCondition, x=Condition)) + 
-    geom_bar(position="dodge", stat="identity")
-
-```
-
-```{r}
-
-m1 <- mosaic(Anxiety ~ Sex,
-       data = opioid_users, 
-       direction = c("v", "h"),
-       labeling_args = list(rot_labels = c(0, 0, 0, 0), offset_varnames = c(left = 6), offset_labels = c(left = 2.6)), gp = grid::gpar(fill=c('#CCCCFF','#9966CC')),
-       main = "Sex Breakdown of Opioid Users with Anxiety")
-
-m2 <- mosaic(Depression ~ Sex,
-       data = opioid_users, 
-       direction = c("v", "h"),
-       labeling_args = list(rot_labels = c(0, 0, 0, 0), offset_varnames = c(left = 6), offset_labels = c(left = 2.6)), gp = grid::gpar(fill=c('#CCCCFF','#9966CC')),
-       main = "Sex Breakdown of Opioid Users with Depression")
-
-#par(mfrow=c(1,2))
-gridExtra::grid.arrange(m1, m2,nrow=1)
-#grid.arrange(m1, m2, ncol=2)
-```
-
-
-
 
 
 ## VI. Interactive Component
