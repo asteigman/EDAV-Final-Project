@@ -85,20 +85,20 @@ drug_study$Income <- fct_relevel(drug_study$Income,">$75,000",after=3)
 ## IV. Missing Values
 
 ```{r}
-tidy_set <- drug_study %>%
-               rownames_to_column("id") %>%
-               gather(key, value, -id) %>%
-               mutate(missing =ifelse(is.na(value), "yes", "no"))
-
-ggplot(tidy_set, aes(x = key, y = fct_rev(id), fill = missing)) +
-  geom_tile(color ="white") +
-  ggtitle("Missing Data for Relevant Drug Study Columns") +
-  scale_fill_viridis_d() 
+# tidy_set <- drug_study %>%
+#                rownames_to_column("id") %>%
+#                gather(key, value, -id) %>%
+#                mutate(missing =ifelse(is.na(value), "yes", "no"))
+# 
+# ggplot(tidy_set, aes(x = key, y = fct_rev(id), fill = missing)) +
+#   geom_tile(color ="white") +
+#   ggtitle("Missing Data for Relevant Drug Study Columns") +
+#   scale_fill_viridis_d() 
 ```
 
 ```{r}
-x <- missing_data.frame(drug_study)
-image(x)
+# x <- missing_data.frame(drug_study)
+# image(x)
 ```
 
 
@@ -119,11 +119,14 @@ cat('%')
 Now, we consider respondents' incomes within our sample. About 30% of users make <$20,000 per year, 35% between $20,000 and $49,999, 15% between $50,000 and $74,999, and 20% make >$75,000 per year. We wanted to add another dimension to this and get more insight on whether certain combinations of groups, also considering gender, were using prescription painkillers. To see how our drug users vary with regard to income and sex, we created the plot below. This plot only includes opioid users, making it easy to see the breakdown. 
 
 ```{r}
-mosaic(Income ~ Sex,
-       data = opioid_users, 
-       direction = c("v", "h"),
-       labeling_args = list(rot_labels = c(0, 0, 0, 0), offset_varnames = c(left = 6), offset_labels = c(left = 2.6)), gp = grid::gpar(fill=c('#CCCCFF', '#CC99FF', '#9966CC', '#663399')),
-       main = "Sex and Income of Opioid Users")
+ggplot(data = opioid_users) +
+   geom_mosaic(aes(x = product(Income, Sex), fill=Income), na.rm=TRUE, show.legend = FALSE) +
+   labs(x="Sex", y="Income", title='Sex and Income of Opioid Users')
+# geom_mosaic(Income ~ Sex,
+#        data = opioid_users, 
+#        direction = c("v", "h"),
+#        labeling_args = list(rot_labels = c(0, 0, 0, 0), offset_varnames = c(left = 6), offset_labels = c(left = 2.6)), gp = grid::gpar(fill=c('#CCCCFF', '#CC99FF', '#9966CC', '#663399')),
+#        main = "Sex and Income of Opioid Users")
 ```
 
 Above we can see that nearly identical proportions of females and males have used prescription painkillers non-medically (slightly more males than females). However, we do see some differences of use within gender when we vary income level. For both genders, we see that the highest proportion of users has an income of between $20,000 and $49,000. For females, usage drops off a bit after that (the majority of female users tend to be more poor). On the other hand, our male respondents with the highest income made up a larger portion of male users as compared to the female proportions. However, for both groups the smallest proportion of opioid users are in the income bracket of $50,000 - $74,999, which is somewhat of an anomaly since it seems more reasonable that either the richest or poorest income groups would be abusing opioids the most, either due to more life struggles or due to more money to spend.  
@@ -323,11 +326,11 @@ Opioids are both relatively not easily accessible and considered to be a "hard" 
 ```{r}
 
 #marijuana
-mosaic(Opioid ~ Marijuana,
-       data = drug_study_youth_plot, 
-       direction = c("v", "h"),
-       gp = grid::gpar(fill=c('light green', 'dark green')),
-       main = "Marijuana Use and Prescription Painkiller Use")
+# mosaic(Opioid ~ Marijuana,
+#        data = drug_study_youth_plot, 
+#        direction = c("v", "h"),
+#        gp = grid::gpar(fill=c('light green', 'dark green')),
+#        main = "Marijuana Use and Prescription Painkiller Use")
 
 #chisq.test(drug_study_youth_plot$Painkiller,drug_study_youth_plot$Marijuana)
 
@@ -338,11 +341,11 @@ Among youth, 17.6% of respondents reported having used marijuana at least once (
 
 ```{r}
 #stimulants
-mosaic(Opioid ~ Stimulant,
-       data = drug_study_youth_plot, 
-       direction = c("v", "h"),
-       gp = grid::gpar(fill=c('pink','dark red')),
-       main = "Stimulant Use and Prescription Painkiller Use")
+# mosaic(Opioid ~ Stimulant,
+#        data = drug_study_youth_plot, 
+#        direction = c("v", "h"),
+#        gp = grid::gpar(fill=c('pink','dark red')),
+#        main = "Stimulant Use and Prescription Painkiller Use")
 
 #chisq.test(drug_study_youth_plot$Painkiller,drug_study_youth_plot$Stimulant)
 ```
