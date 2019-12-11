@@ -1,5 +1,5 @@
 ---
-title: "Final Project: Exploring the National Survey on Drug Use and Health "
+title: "Final Project: Exploring Prescription Painkiller Use and Abuse"
 author: "Suman Tripathy, Amanda Steigman"
 date: "11/23/2019"
 output: html_document
@@ -18,15 +18,16 @@ library(ggmosaic)
 library(mi)
 library(dplyr)
 library(plyr)
+library(extracat)
 ```
 
 ## I. Introduction
 
-The opioid crisis in America has been worsening rapidly and is perhaps finally in the past few years gaining the public and media awareness it needs, perhaps coming to a head over the summer in the first state trial of Oklahoma versus Johnson & Johnson, where the pharmaceutical company was ordered to pay $572 million for its contribution to the opioid crisis in the state.Opioids are most commonly prescription pain relievers, but the category also stretches to include heroin and synthetic opioids such as fentanyl. The topic is both concerning and fascinating, as the opioids used most frequently are in fact ones that can be prescribed by doctors, such as oxycodone and hydrocodone. Some users may then transition to other drugs or illegal opioids like heroin. 
+The opioid crisis in America has been worsening rapidly and is perhaps finally in the past few years gaining the public and media awareness it needs, perhaps coming to a head over the summer in the first state trial of Oklahoma versus Johnson & Johnson, where the pharmaceutical company was orderd to pay [$572 million](https://www.cnn.com/2019/08/26/health/oklahoma-opioid-trial-verdict-bn/index.html) for its contribution to the opioid crisis in the state. Opioids are most commonly prescription pain relievers, but the category also stretches to include heroin and synthetic opioids such as fentanyl. The topic is both concerning and fascinating, as the opioids used most frequently are in fact ones that can be prescribed by doctors, such as oxycodone and hydrocodone. Some users may then transition to other drugs or illegal opioids like heroin. 
 
-Opioid usage, both medically and nonmedically, is getting more common.  The National Institute on Drug Abuse found in January 2019 that "more than 130 people in the United States die after overdosing on opioids" every day. The Center for Disease Control and Prevention has released an estimate that opioid misuse in the US costs $78.5 billion a year in terms of healthcare costs, lost productivity, rehab treatments, and criminal justice activities.
+Opioid usage, both medically and nonmedically, is getting more common. The National Institute on Drug Abuse found in January 2019 that "more than 130 people in the United States die after overdosing on opioids" every day. The Center for Disease Control and Prevention has released an estimate that opioid misuse in the US costs $78.5 billion a year in terms of healthcare costs, lost productivity, rehab treatments, and criminal justice activities.
 
-Our data source, the National Survey on Drug Use and Health (NSDUH) 2013 survey, asks questions about nonmedical use of drugs, including opioids, which it defined as when a prescription opioid "was used when not presribed to the user or used for the experience or feeling caused by the drug." This term 'nonmedical use" has inherent ambiguity, and recent analyses of the NSDUH data estimate that about two-thirds of adults miusing opioids actually used the drug in order to relieve physical pain. Other adults used the medication to relieve stress or anxiety and sleep. Only about 11% of misusers are thought to actually use the opioid to "get high." These figures are important to remember throughout our analysis of opioid users in order for us to understand the opioid crisis more accurately. We take all our exploration and analysis with a grain of salt because survey takers may have been unclear about this definition when answering the questions and moreover, there are unclear boundaries between nonmedical use, misuse, and abuse.
+Our data source, the National Survey on Drug Use and Health (NSDUH) 2013 survey, asks questions about nonmedical use of drugs, including opioids, which it defined as when a prescription opioid "was used when not presribed to the user or used for the experience or feeling caused by the drug." This term "nonmedical use" has inherent ambiguity, and recent analyses of the NSDUH data estimate that about two-thirds of adults miusing opioids actually used the drug in order to relieve physical pain. Other adults used the medication to relieve stress or anxiety and sleep. Only about 11% of misusers are thought to actually use the opioid to "get high."  These figures are important to remember throughout our analysis of opioid users in order for us to understand the opioid crisis more accurately. In our analysis, we stick to our data source's definition - when a prescribed opioid is taken but is either not prescribed to the user or is used for the "experience" of the drug. We take all our exploration and analysis with a grain of salt because survey takers may have been unclear about this definition  when answering the questions and moreover, there are unclear boundaries between nonmedical use, misuse, and abuse.
 
 Sources of prescription painkillers can be either the "black market" off the street or directly from doctors. An alarming number of doctors have been caught for inappropriate opioid prescription. Moreover, 21% to 29% of chronic pain patients have been found to misuse their prescribed opioids. 8% to 12% may develop an opioid use disorder, and 4% to 6% transition from an opioid prescripton to heroin use. Given these worrisome figures, which provide part of the basis for *how* people are using opioids, we chose to explore data regarding *who* is misusing opioids in the United States. We focused on answering the following questions:
 
@@ -36,15 +37,15 @@ Sources of prescription painkillers can be either the "black market" off the str
   - What particular difficulties do youth who abuse opioids face? 
   - What trends do we see between opioid abuse and other substance abuse, both for the overall population and youth specifically? 
 
-## II. Data Sources
+## II. Data Source
 
 Our data source is the [National Survey on Drug Use and Health](https://www.icpsr.umich.edu/icpsrweb/NAHDAP/studies/35509/documentation#) from 2013. The primary investigators were the United States Department of Health and Human Services, the Substance Abuse and Mental Health Services Administration, and the Center for Behavioral Health Statistics and Quality. This survey has been conducted perioidically since 1971 and has transitioned from a traditional paper-pencil method to a computer-assisted interviewing method. It combines computer-assisted personal interviewing and computer-assisted self-interviewing. It is a highly private and confidential system in order to encourage participant honesty regarding these sensitive behaviors.
 
 The demographic population is "the civilian, noninstituitionalized population of the United States ... who were 12 years of age or older at the time of the survey." Since 2002, NSDUH respondents have been incentivized with a $30 reward for taking the survey, and an improvement in the survey response rate was noted afterwards. This increase in response rate may also be tied to better public awareness about these critical issues. A total final sample of 67,838 interviews were conducted.
 
-The dataset itself contains a myriad of information about the use of drugs, alcohol, and tobacco. It also covers mental and physical illnesses, population demographics, criminal activities, and more. The target demographic is members of US households, age 12 and older. Our loaded dataframe contains 55160 rows (participants) and 3142 columns (survey questions). However, we focus on a small subset of the data that is relevant to the questions we outlined above, and therefore only include about 20 variables in our analysis. Note that some of these columns are imputed values based on responses to other survey questions. Moreover, there is likely a discrepancy between the dataset's rows and total number of interviews due to quality checks for misinformation or missing data. 
+The dataset itself contains a myriad of information about the use of drugs, alcohol, and tobacco. It also covers mental and physical illnesses, population demographics, criminal activities, and more. The target demographic is members of US households, age 12 and older. Our loaded dataframe contains 55160 rows (participants) and 3142 columns (survey questions). However, we focus on a small subset of the data that is relevant to the questions we outliner above, and therefore include around 20 variables in our analysis. Note that some of the columns are imputed values based on responses to other survey questions. Moreover, there is likely a discrepancy between the dataset's rows and total number of interviews due to quality checks for misinformation or missing data. 
 
-As we are working with survey data, we we have considered possible challenges that may come with this (for example, making sure that "missing" values are actually "missing" and are not logically "no.") We are checking this by going back to earlier survey sections to see how participants' earlier responses may have caused parts of the survey to be skipped. We are also evaluating the imputed columns to see whether they are more cleaned and reliable than direct response columns.
+As we are working with survey data, we have considered possible challenges that may come with this. For example, we have made sure that "missing" values are actually "missing" and are not logically "no." We have checked this by going back to earlier survey sections to see how participants' earlier responses may have caused parts of the survey to be skipped. We have also evaluated the imputed columns to see whether they are more cleaned and reliable than direct response columns.
 
 ## III. Data Transformation
 
@@ -114,13 +115,14 @@ ggplot(data = opioid_users) +
    geom_mosaic(aes(x = product(Income, Sex), fill=Income), na.rm=TRUE, show.legend = FALSE) +
    labs(x="Sex", y="Income", title='Sex and Income of Opioid Users')  +
   theme_grey(14) +
-  scale_fill_manual(values=c("#56B4E9",  "#CC79A7", "#009E73", "#D55E00"))
+  scale_fill_manual(values=c("#56B4E9",  "#CC79A7", "#009E73", "#D55E00")) + theme(plot.title = element_text(hjust = 0.5))
 ```
 
-Above, we can see that nearly identical proportions of females and males have used prescription painkillers nonmedically (slightly more males than females). However, we do see some differences of use within gender when we vary income level. For both genders, we see that the highest proportion of users has an income of between $20,000 and $49,000. For females, usage drops off a bit after that (the majority of female users tend to be more poor). On the other hand, our male respondents with the highest income made up a larger portion of male users as compared to the female proportions. However, for both groups the smallest proportion of opioid users are in the income bracket of $50,000 - $74,999, which is somewhat of a surprise. It would peraps make more logical sense for either the richest or poorest income groups to be abusing opioid use.
-# is this now too vague since i don't provide any explanation? it seems safer than the previous sentence lol
+Above, we can see that nearly identical proportions of females and males have used prescription painkillers nonmedically (slightly more males than females). However, we do see some differences of use within gender when we vary income level. For both genders, we see that the highest proportion of users has an income of between $20,000 and $49,000. For females, usage drops off a bit after that (the majority of female users tend to be more poor). On the other hand, our male respondents with the highest income made up a larger portion of male users as compared to the female proportions. However, for both groups the smallest proportion of opioid users are in the income bracket of $50,000 - $74,999.
 
-The above graph only considers whether or not a respondent has used a prescription painkiler nonmedically before, but to dig into the data more, we chose to look at the frequency of use, this time focusing only on income. To be consistent with many previous opioid investigations, we define frequent users as those with 100 or more days of nonmedical opioid use in the past year and highly frequent as those with 200 or more days of nonmedical use. Looking at the frequency can give us a better idea of whether a respondent was abusing an opioid recreationally or whether a user may have been taking the drug for a prolonged period of time for a reason they viewed as necessary, like chronic pain. We first look at how many days opioid users reported having used a drug of this class in the past year regardless of income.  
+#i actually got rid of the last sentence because after thinking more about it, having more $ on its own wouldnt necessarily be predictive of using opioids, since this only looks at whether one has used, not how often, and purchasing opioids once isn't expensive
+
+The above graph only considers whether or not a respondent has used a prescription painkiler nonmedically before, but to dig into the data more, we chose to look at the frequency of use, this time focusing only on income. To be consistent with many previous opioid investigations, we define frequent users as those with 100 or more days of nonmedical opioid use in the past year and highly frequent as those with 200 or more days of nonmedical use. Looking at the frequency of use can give us a better idea of whether a respondent was using an opioid occasionally, perhaps due to experimentation with drugs or a flare-up of a medical condition causing pain, or whether a user may have been taking the drug for a prolonged period of time for a reason they viewed as necessary, like chronic pain or addiction to the drug. Of course, we cannot read too much into what frequency of use may actually indicate - whether it was for to get high or to relieve pain - due to limited medical data of respondents. As we discussed, the ambiguity of the term "nonmedical" also makes this difficult. Either way, frequency of use is still interesting to look at, particularly with regard to income, due to the associated costs with drug usage. We first look at how many days opioid users reported having used a drug of this class in the past year regardless of income.  
 
 
 ```{r, warning=FALSE, fig.height=4, fig.width=10}
@@ -128,11 +130,11 @@ ggplot(data = opioid_users, mapping = aes(ANLYRTOT)) +
   geom_histogram(binwidth = 10, boundary=-0.5, fill="#0072B2") + 
   labs(title = "Total Days Using Non-Medical Pain Reliever in Past Year", x = "Number of Days", y = "Count") + 
   scale_x_continuous(breaks=seq(0,365,10))  +
-  theme_grey(11) 
+  theme_grey(11)  + theme(plot.title = element_text(hjust = 0.5))
   # TO MAKE TEXT BIGGER AND MAKE AXIS TICKS EVERY 20 OR MORE SENSICAL THIS WAY?
 ```
 
-This variable, ANYLRTOT, records how many times in the past year a respondent used opioids. However, as noted in the missing data section, the majority of values for our population of interest - opioid users - were missing (63.8%). Nonetheless, we still explore the data points we do have. The histogram above is unimodal showing that most opioid misusers have taken the opioid less than ten times a year. If we only look at the opioid users who answered this question on the survey, 7.24% (212 out of 2927) of them can be classified as highly frequent users, 9.5% (279 out of 2927) are frequent users, and 83.2% (2436 out of 2927) reported infrequent use. We proceed by looking at how this varies by income level. 
+This variable, ANYLRTOT, records how many times in the past year a respondent used opioids. However, as noted in the missing data section, the majority of values for our population of interest - opioid users - were missing (63.8%). Nonetheless, we still explore the data points we do have. The histogram above is unimodal showing that most opioid misusers have taken the opioid fewer than ten times a year. If we only look at the opioid users who answered this question on the survey, 7.24% (212 out of 2927) of them can be classified as highly frequent users, 9.5% (279 out of 2927) are frequent users, and 83.2% (2436 out of 2927) reported infrequent use. We proceed by looking at how this varies by income level. 
 
 ```{r, fig.width=10}
 ggplot(opioid_users[!is.na(opioid_users$frequency),], aes(fct_rev(Income))) + 
@@ -152,7 +154,7 @@ It is important to note that in the above graph, we only look at the subset of o
 
 While it is difficult to determine the actual price of purchasing prescription painkillers due to the fact that they are often obtained on the "black market," we used [StreetRx](https://streetrx.com/), a program that allows people to anonymously submit how much they paid for illegal drugs, as an estimate. According to StreetRx, the average price per milligram of oxycodone, one of the most commonly used prescription painkillers, is $1.40. Based on this, a user would pay around $15 per pill/dose. For a frequent user this would mean he spends, on average, between $1,500 and $3,000 per year on prescription painkillers. This is not cheap - especially for someone making $20,000 per year, this could mean 7.5% to 15% of income would be going to drug use. Thus, it is interesting to see that the greatest proportions of frequent and highly frequent users are in the income bracket of under $20,000 and that evidently, income is not a major barrier to opioid abuse and addiction.
 
-Lastly, we look at the relationship between income and crime, specifically comparing arrest rates of non-medical opioid users to non-users. 
+Lastly, we look at the relationship between income and crime, specifically comparing arrest rates of nonmedical opioid users to non-users. 
 
 ```{r, warning=FALSE, fig.height=6,fig.width=12}
 levels(opioid_users$Income) <- gsub("- ", "-\n", levels(opioid_users$Income))
@@ -183,12 +185,11 @@ Overall, just about one third of opioid users have been arrested and booked for 
 p = ggplot(data = opioid_users[!is.na(opioid_users$Booked) & !is.na(opioid_users$frequency),], mapping = aes(Booked)) + 
   geom_bar(aes(y = ..prop.., group = 1), fill = c("#E69F00", "#56B4E9", "#E69F00", "#56B4E9", "#E69F00", "#56B4E9")) + 
   facet_wrap(~frequency) +
-  labs(title = "Ever Been Arrested and Booked for Breaking Law", x = "Been Booked", y = "Proportion") + 
-  theme_grey(14) 
+  labs(title = "Arrests by Frequency of Opioid Use", x = "Been Booked", y = "Proportion") + 
+  theme_grey(14) + theme(plot.title = element_text(hjust = 0.5))
   
 show(p)
 
-# DOES THIS NEED A LEGEND? I JUST COLOR CODED TO BE AESTHETIC
 ```
 
 Looking once more at the smaller subset of users who responded about their frequency of use, we see a positive correlation between frequency of use and arrest rate. Of all the infrequent users, only about 30% have ever been booked. For frequent users, this figure increases to about 46%. Highly frequent users hold the highest percentage, with nearly 50% of them have been booked before. This finding is interesting because opioids do seem like a more "harmless" or "peaceful" type of drug to abuse. *can we cite a study/article here?* We must recognize, however, that there may be other serious issues in these respondents' lives that can lead to both increased opioid abuse as well as higher likelihoods of committing crimes. One such potential cause is mental health, which we chose to investigate in depth in the following section.
@@ -203,38 +204,39 @@ opioid_users$Anxiety <- factor(opioid_users$Anxiety, levels = c("no", "yes"))
 p1 <- ggplot(non_users[!is.na(non_users$Anxiety),], mapping = aes(Anxiety)) +
   geom_bar(aes(y = ..prop.., group = 1), fill = c("#E69F00", "#56B4E9")) +
   labs(title = "Non-Opioid Users' Anxiety Rates", x = "Has Anxiety", y = "Proportion") + 
-  theme_grey(14) 
+  theme_grey(14) + theme(plot.title = element_text(hjust = 0.5))
 
 p2 <- ggplot(opioid_users[!is.na(opioid_users$Anxiety),], mapping = aes(Anxiety)) +
   geom_bar(aes(y = ..prop.., group = 1), fill = c("#E69F00", "#56B4E9")) +
   labs(title = "Opioid Users' Anxiety Rates", x = "Has Anxiety", y = "Proportion") + 
-  theme_grey(14) 
+  theme_grey(14) + theme(plot.title = element_text(hjust = 0.5))
 
 p3 <- ggplot(non_users[!is.na(non_users$Depression),], mapping = aes(Depression)) +
   geom_bar(aes(y = ..prop.., group = 1), fill = c("#E69F00", "#56B4E9")) +
   labs(title = "Non-Opioid Users' Depression Rates", x = "Has Depression", y = "") + 
-  theme_grey(14) 
+  theme_grey(14) + theme(plot.title = element_text(hjust = 0.5))
 
 p4 <- ggplot(opioid_users[!is.na(opioid_users$Depression),], mapping = aes(Depression)) +
   geom_bar(aes(y = ..prop.., group = 1), fill = c("#E69F00", "#56B4E9")) +
   labs(title = "Opioid Users' Depression Rates", x = "Has Depression", y = "") + 
-  theme_grey(14) 
+  theme_grey(14) + theme(plot.title = element_text(hjust = 0.5))
 
 grid.arrange(p1, p2, p3, p4, nrow=2, ncol=2)
 
-# DOES THIS NEED A LEGEND? I JUST COLOR CODED TO BE PRETTY
 ```
 
 Here, we compare anxiety levels across opioid users and non-opioid users.  Firstly, we note that the percentages in each graph do not add up to 100% due to NA responses. More interestingly, however, we see a substantial difference between opioid users' and non-opioid users' anxiety rates. Only about 5.06% of non-opioid users report having anxiety whereas 13.40% of opioid users report anxiety. We see extremely similar results when comparing depression rates between non-users and users as well. 5.82% of non-users indicated that they had depression as compared to the 13.45% of opioid users with depression.  
 
-To see how significant these results actually are, we conduct a [Chi-Square Test of Independence](https://www.statisticssolutions.com/non-parametric-analysis-chi-square/. This test serves to determine whether there is a statistically significant relationship between two categorical variables (i.e. anxiety and opioid use, depression and opioid use). The basis of the test rests on an initial hypothesis that there is no relationship between these variables, and we only "reject" this hypothesis, meaning assume there is some relationship between the variables, if we find an extremely low probability of observing the data we have. We set a "level of significance," which is a boundary for how rare the results that we see must be in order for us to believe our initial hypothesis must be incorrect.
+To see how significant these results actually are, we conduct a [Chi-Squared Test of Independence](https://www.statisticssolutions.com/non-parametric-analysis-chi-square/). This test serves to determine whether there is a statistically significant relationship between two categorical variables (i.e. anxiety and opioid use, depression and opioid use). The basis of the test rests on an initial hypothesis that there is no relationship between these variables, and we only "reject" this hypothesis, meaning assume there is some relationship between the variables, if we find an extremely low probability of observing the data we have. We set a "level of significance," which is a boundary for how rare the results that we see must be in order for us to believe our initial hypothesis must be incorrect.
+
+#explanation is good but i think we don't need to cite the source
 
 ```{r}
 chisq.test(drug_study$Opioid,drug_study$Anxiety)
 chisq.test(drug_study$Opioid,drug_study$Depression)
 ```
 
-When we conduct the Chi-Square Test of Independence on our variables, we see extremely small p-values, implying that there is an incredibly low probability of seeing these survey responses when opioid use is completely independent to both anxiety and depression. Therefore, even when we choose an extremely low significance level of 1%, we still "reject" our initial hypothesis, implying that there is a correlation between opioid use and anxiety as well as a correlation between opioid use and depression.
+When we conduct the Chi-Squared Test of Independence on our variables, we see extremely small p-values, implying that there is an incredibly low probability of seeing these survey responses when opioid use is completely independent to both anxiety and depression. Therefore, even when we choose an extremely low significance level of 1%, we still "reject" our initial hypothesis, implying that there is a correlation between opioid use and anxiety as well as a correlation between opioid use and depression.
 
 To continue gaining insights about what kind of opioid users face these mental health issues that may be tied to their painkiller misuse, we explore some extra factors like gender, age, and frequency of use. We initially looked at gender, but the results were not particularly surprising. We saw very clearly that women's anxiety and depression rates are almost double that of men, regardless of whether they use opioid. This is a well-researched phenomenon. For example, the Anxiety and Depression Association of America has released numerous studies and [articles](https://adaa.org/about-adaa/press-room/facts-statistics) stating that women are twice as likely to have anxiety as men, and the most common disorder to co-occur with anxiety is depression. 
 
@@ -249,16 +251,18 @@ p1 <-  ggplot(data = opioid_users[!is.na(opioid_users$frequency),]) +
    geom_mosaic(aes(x = product(Anxiety, frequency), fill=Anxiety), na.rm=TRUE, show.legend = FALSE) +
    labs(x="Frequency of Opioid Use", y="Has Anxiety", title='Frequency of Use Breakdown for Opioid Users with Anxiety') +
    theme_grey(11) + 
-  scale_fill_manual(values=c("#E69F00", "#56B4E9"))
+  scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme(plot.title = element_text(hjust = 0.5))
 
 p2 <-  ggplot(data = opioid_users[!is.na(opioid_users$frequency),]) +
    geom_mosaic(aes(x = product(Depression, frequency), fill=Depression), na.rm=TRUE, show.legend = FALSE) +
    labs(x="Frequency of Opioid Use", y="Has Depression", title='Frequency of Use Breakdown for Opioid Users with Depression') + 
    theme_grey(11) + 
-  scale_fill_manual(values=c("#E69F00", "#56B4E9"))
+  scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme(plot.title = element_text(hjust = 0.5))
 
 grid.arrange(p1, p2, ncol=2)
 ```
+
+#one of the titles is getting cut off
 
 We note that anxiety and depression rates increase alongside frequency of opioid use. Infrequent opioid users have the lowest rates of anxiety (15.7%)  and depression (15.5%) whereas highly frequent opioid users are the most likely to have anxiety (21.7%) and depression (22.7%). There could be a variety of reasons for this finding. The most naive assumption is that anxious or depressed people may take opioids regularly to "cope" with these disorders. More likely, however, is a hidden underlying variable such as chronic illness that may be correlated with anxiety and depression as well as highly frequent opioid use. The [Harvard Women's Health Watch](https://www.health.harvard.edu/staying-healthy/anxiety_and_physical_illness) finds that people with chronic respiratory disorders have a higher likelihood of developing anxiety disorders and vice versa as well. Worryingly, they also assert that "anxiety is a cause for non-compliance with medical treatment." This could either mean not regularly keeping up with medications and self-care or more relevant to our analysis, abusing prescribed painkiller medications. Unfortunately, the NSDUH data does not provide very much data on chronic conditions, so these interesting questions could only be further researched with an adjacent data set. 
 
@@ -271,10 +275,11 @@ a1 <-  ggplot(data = opioid_users) +
    geom_mosaic(aes(x = product(Anxiety, Age), fill=Anxiety), na.rm=TRUE, show.legend = FALSE) +
    labs(x="Age", y="Has Anxiety", title='Age Breakdown of Opioid Users with Anxiety') +
    theme_grey(13) + 
-   scale_fill_manual(values=c("#E69F00", "#56B4E9"))
+   scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme(plot.title = element_text(hjust = 0.5))
 show(a1)
 ```
-Now, we investigate anxiety rates in opioid users broken down by age groups. We looked at a plot of anxiety rates in non users split by age as well, but it provided nearly the same insights as this graph, so we elected not to include it. The graph clearly displays a general trend of increasing likelihood of anxiety with age, meaning the youngest opioid users have the lowest proportion of anxiety while the oldest opioid users have the highest. The Anxiety and Depression Associate of America reaffirms these results by providing statistics that one in eight (12.5%) [children](https://adaa.org/living-with-anxiety/children) are affected by anxiety disorders where as 18.1% of the [adult](https://adaa.org/about-adaa/press-room/facts-statistics) population in the US are prone to anxiety disorders. This leads to the takeaway that youth opioid misuse is perhaps less tied to anxiety and depression than adult misuse. As a result, there must be different causes for youth misuse such as social environment, extracurriculars, peer pressure, and more, which we now go on to explore in the next section.
+Now, we investigate anxiety rates in opioid users broken down by age groups. We looked at a plot of anxiety rates in non-users split by age as well, but it provided nearly the same insights as the graph above (comparing rates of anxiety among users vs. non-users without looking at age), so we elected not to include it. The graph clearly displays a general trend of increasing likelihood of anxiety with age, meaning the youngest opioid users have the lowest proportion of anxiety while the oldest opioid users have the highest. The Anxiety and Depression Associate of America reaffirms these results by providing statistics that one in eight (12.5%) [children](https://adaa.org/living-with-anxiety/children) are affected by anxiety disorders where as 18.1% of the [adult](https://adaa.org/about-adaa/press-room/facts-statistics) population in the US are prone to anxiety disorders. This leads to the takeaway that youth opioid misuse is perhaps less tied to anxiety and depression than adult misuse. There must be different causes for youth misuse such as social environment, extracurriculars, and experimentation, which we now go on to explore in the next section.
+
 
 ### Youth Prescription Painkiller Use
 
@@ -291,12 +296,12 @@ ggplot(drug_study, aes(fct_rev(Age))) +
   theme(plot.title = element_text(hjust = 0.5)) + 
   theme_grey(14) + 
   guides(fill = guide_legend(reverse = TRUE)) + 
-  scale_fill_manual(values=c("#E69F00", "#56B4E9"))
+  scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme(plot.title = element_text(hjust = 0.5))
 ```
 
 We can see that as age increases, a user is more likely to have used a prescription painkiller non-medically, but this levels off at the ages of 21-34 and even decreases for the oldest group. It is obvious and intuitive that there would be a larger proportion of people who have tried opioids as age increases because they have had longer to try these drugs, and it is more rare to try a "harder" drug (substances like opioids and stimulants as opposed to marijuana and alcohol) at a younger age. What is more interesting, though for this chart, is the older demographic: if an individual has not tried taking a prescription painkiller non-medically by their early 20's, they are perhaps less likely to ever try them as they get older. Additionally, the fact that the oldest population is the least likely to have used opioids non-medically suggets that opioid misuse has become a more popular issue in the United States. It implies that perhaps there is some level of youth "hype" over the drug that leads to higher use in these age groups. 
 
-For our youth population as a whole (N = 17,736; ages 12-17), approximately 7.6% of respondents have tried an opioid for non-medical purposes, which is about half of the rate we found overall in the survey. We proceed by examining how this group of users may differ from their peers. First, we look at the different types of activities that youth respondents participated in. Participation in activities is interesting to look at because it can give us insight to how engaged a youth is - we would expect youths who are more engaged to be less likely to use opioids (and other drugs) non-medically.
+For our youth population as a whole (N = 17,736; ages 12-17), approximately 7.6% of respondents have tried an opioid for non-medical purposes, which is about half of the rate we found overall in the survey. We proceed by examining how this group of users may differ from their peers. First, we look at the different types of activities that youth respondents participated in. Participation in activities is interesting to look at because it can give us insight to how engaged a youth is - we would expect youths who are more engaged to be less likely to use opioids (and other drugs) nonmedically.
 
 ```{r, fig.width=9}
 tidy_act <- select(.data=drug_study,Faith,School,Community,Other,Opioid) %>%
@@ -320,52 +325,40 @@ ggplot(tidy_act_yth, aes(Opioid)) +
 
 We can see that overall, there is not much difference between participation in each activity based on opioid usage - while those youth who have never tried an opioid non-medically have slightly higher participation, it is never by more than 5%. Regardless of opioid usage, the highest proportion of youth participates in activities at school, then community activities, followed by faith-based activities, and finally other activities. The overall lack of difference between opioid users and non-users in participation rates goes against what we would expect, which leads us to ask: if being more engaged is not a way to prevent opioid usage in teens, what is?
 
-Opioids are relatively inaccessible and are considered to be "hard" drugs (more risk of addiction and more serious negative health impacts) when compared to, for example, marijuana, which is used more commonly both among adults and teens. If a teen is experimenting with prescription painkillers, we may expect that he or she would also be experimenting with other drugs (we cannot infer anything about causality based on our data, but we can look at the correlations). We test whether there is a relationship between a youth having used a prescription painkiller non-medically and a youth having used marijuana (a less "hard" drug) as well as whether there is a relationship between a youth having used a prescription painkiller and a youth having used stimulants such as amphetamine (another "hard" drug).
-
-```{r}
-
-#marijuana
-# mosaic(Opioid ~ Marijuana,
-#        data = drug_study_youth_plot, 
-#        direction = c("v", "h"),
-#        gp = grid::gpar(fill=c('light green', 'dark green')),
-#        main = "Marijuana Use and Prescription Painkiller Use")
-
-#chisq.test(drug_study_youth_plot$Painkiller,drug_study_youth_plot$Marijuana)
-
-# I WONDER IF WE CAN MAKE ONE OF THOSE PLOTS THAT COMPARE VARIABLES HERE?  LIKE THE MANY SQUARES ONE?
-```
-
-Among youth, 17.6% of respondents reported having used marijuana at least once (a little more than double the proportion of youth who reported having tried prescription painkillers non-medically at least once). The plot above suggests that there is a relationship between teens using marijuana and using prescription opioids, and the Chi-squared test of independence also provided evidence towards this result (p-value of < .01). As we can see, the vast majority - almost four-fifths of youth - have not tried either drug. However, among youth that have tried marijuana, almost 23% have tried using a prescription painkiller non-medically. This is three times the proportion of youth who have tried one of these types of drugs in our general youth survey sample. Interestingly, though, 4.3% of our youth sample tried prescription painkillers without trying marijuana. While this is only a little more than half the rate for youth overall, it is still a bit higher than we would expect. Perhaps the drug was more accessible to these youth because they stole it from their parents or had extra left from a surgery or an injury versus marijuana which they would need to purchase from someone. It is also more difficult to hide marijuana from parents than it is to hide pills.
-
-```{r}
-#stimulants
-# mosaic(Opioid ~ Stimulant,
-#        data = drug_study_youth_plot, 
-#        direction = c("v", "h"),
-#        gp = grid::gpar(fill=c('pink','dark red')),
-#        main = "Stimulant Use and Prescription Painkiller Use")
-
-#chisq.test(drug_study_youth_plot$Painkiller,drug_study_youth_plot$Stimulant)
-```
-
-Among youth, only around 2% have reported trying a stimulant at least once. The plot above suggests that there is a relationship between teens using stimulants and using prescription opioids, and the Chi-squared test of independence also provided evidence towards this result (p-value of < .01). Again, most teens - almost 92% - have not tried either drug. Teens who have tried stimulants are extremely more likely to have tried a prescription painkiller non-medically; this is the case for almost 3/5 of teens who have tried stimulants. Having tried a prescription painkiller is not as strong of a predictor of having tried a stimulant - this is the case for about 14.5% of those who have tried opioids (about double the rate for youth overall). Overall, it is interesting that there is a relationship between using the two drugs since they have quite different effects on the user. However, this suggests that teens using both drugs are perhaps more interested in chasing the "high" regardless of what it is specifically and are possibly more interested in experimenting with drugs more generally.
+In order to investigate a different possibility for opioid usage  - perhaps youths who use and/or have tried other drugs are more likely to use and/or have tried prescription painkillers nonmedically - we include this exploration in the next section, which is the interactive component of our analysis.
 
 
 ## VI. Interactive Component
 
+Opioids are relatively inaccessible and are considered to be "hard" drugs (more risk of addiction and more serious negative health impacts) when compared to, for example, marijuana, which is used more commonly both among adults and teens. If a person is experimenting with prescription painkillers, we may expect that he or she would also be experimenting with other drugs (we cannot infer anything about causality based on our data, but we can look at the correlations). We are interested in whether there is a relationship between a respondent having used a prescription painkiller nonmedically and he or she having used other drugs. We look at three different classes of drugs, each of which is interesting and unique in its own right. First, we test marijuana, as it is the most common drug used recreationally (other than alcohol), and is considered to be less of a "hard" drug than opioids. We then test the relationship between using opioids and stimulants - two drugs with different effects but both considered to be "hard" drugs, and both drugs that can be prescribed in some form (for example, a commonly prescribed stimulant is Adderall). Finally, we test the relationship between using opioids and hallucinogens - hallucinogens are also a drug class with more serious side effects, but give the user a unique experience from stimulants and opioids (i.e. a more "cerebral high"), and thus we might not expect hallucinogen use and opioid use to be correlated (though we will see that is not the case). For hallucinogens and stimulants, we look at the entire drug class rather than a single drug (such as LSD or Adderall, respectively) to be consistent with looking at the entire class of prescription painkillers. We look at marijuana on its own, as it is such a commonly used drug and also does not fit neatly into a class.
+
+For our [interactive component](link), we created a series of mosaic plots. The user has the ability to explore the relationship between survey respondents having used (or not used) prescription painkillers nonmedically and having used (or not used) either marijuana, stimulants, or hallucinogens. The user can also toggle between looking at the overall population or looking at the youth population specifically. Accompanying the plots are results of a chi-squared test that shows whether or not these using one of these other drugs is independent of using opioids. In all cases, we found that the relationship was significant.
+
+In all cases, we can see that when we switch from looking at overall population to the youth population, the proportion who has not tried either drug increases significantly, and the proportion who has not tried opioids but has tried the other drug (either marijuana, stimulants, or hallucinogens) also decreases a bit. Interestingly, within those who have tried the other drug, the proportion who have also tried opioids does not really change. While drugs may be more difficult for the younger population to obtain, and we see that overall, a smaller population of youth has used any type of drug, it appears that regardless of age, having used one of these drugs makes one more likely to have used another drug.
+
+Since we are particularly interested in the youth population, we expand on our analysis of youth usage:
+
+First, among youth, 17.6% of respondents reported having used marijuana at least once (a little more than double the proportion of youth who reported having tried prescription painkillers nonmedically at least once). As we can see in the mosaic plot, the vast majority - almost four-fifths of youth - have not tried either drug. However, among youth that have tried marijuana, almost 23% have tried using a prescription painkiller nonmedically. This is three times the proportion of youth who have tried one of these types of drugs in our general youth survey sample. Interestingly, though, 4.3% of our youth sample tried prescription painkillers without trying marijuana. While this is only a little more than half the rate for youth overall, it is still a bit higher than we would expect. Perhaps the drug was more accessible to these youth because they stole it from their parents or had extra left from a surgery or an injury versus marijuana which they would need to purchase from someone. It is also more difficult to hide marijuana from parents than it is to hide pills.
+
+Next, we look at the opioids vs. stimulants plot for the youth population. Among youth, only around 2% have reported trying a stimulant at least once. Again, the mosaic plot shows us that most teens - almost 92% - have not tried either drug. Teens who have tried stimulants are extremely more likely to have tried a prescription painkiller nonmedically; this is the case for almost 3/5 of teens who have tried stimulants. Having tried a prescription painkiller is not as strong of a predictor of having tried a stimulant - this is the case for about 14.5% of those who have tried opioids (about double the rate for youth overall). Overall, it is interesting that there is a relationship between using the two drugs since they have quite different effects on the user. However, this suggests that teens using both drugs are perhaps more interested in chasing the "high" regardless of what it is specifically and are possibly more interested in experimenting with drugs more generally.
+
+Finally, we look at the relationship between youth having used opioids and youth having used hallucinogens, which are slightly more popular than stimulants: approximately 3.1% of youth have tried a hallucinogen. Among this group, half have tried a prescription painkiller nonmedically. This rate is about double the rate we observed for marijuana users, though a bit lower than what we saw for stimulant users. This suggests a few insights: first, it seems there is a stronger relationship between using opioids, a "hard" drug, and other "hard" drugs (stimulants and hallucinogens) than there is between using opioids and a less harmful drug like marijuana, perhaps some evidence against the argument that marijuana is a "gateway" drug (of course, a "gateway" implies causality, so we could not argue in favor of it here anyway since we are just looking at correlations). Also, it is interesting that there is such a strong relationship between using opioids and using hallucinogens, two drugs whose stereotypical users we think of as being quite different. Like with stimulants, we argue that this relationship may be due to desire to experiment with different drugs, a behavior we would expect to be especially common among teens. 
+
+Lastly, it is interesting that the relationship between using opioids and using hallucinogens is a bit less strong than the one between opioid and stimulant use. We propose two potential reasons for this, the first of which we have touched on: the high from a stimulant is more similar to a high from an opioid. Both of these drugs have high potential for addiction, which is not the case for marijuana or hallucinogens. Perhaps the users are thus less concerned with the specific drug and more interested in satisfying their addiction. Another potential reason why the relationship is a bit less strong between opioid and hallucinogen usage, especially among youths, could be that it is more difficult to obtain hallucinogens. At least some stimulants can be obtained via prescription, and for youths, a commonly prescribed stimulant is Adderall; there is definitely potential for abuse here. Perhaps those with access to prescribed painkillers also have access to prescribed stimulants, especially if particular doctors are generally overprescribing medications. However, our main focus for this analysis is prescription painkillers specifically, so we did not look more into this possibility.
+
+
 ## VII. Conclusion
 
-The NSDUH dataset turned out to be an extremely useful data source with many variables that have interesting connections to opioid use. We explored a lot of basic demographics of opioid users and derived some intriguing statistics - about 50% of users are male and 50% female. The most common income bracket for opioid users is $20,000 to $49,999, and the most common ages of opioid users are 21 to 34. We also saw a correlation between opioid users and a higher number of arrests, specifically as we leaned towards poorer income brackets.
+The NSDUH dataset turned out to be an extremely useful data source with many variables that have interesting connections to opioid use. We explored a lot of basic demographics of opioid users and derived some intriguing statistics; for example, about 50% of users are male and 50% female. The most common income bracket for opioid users is $20,000 to $49,999, and the most common ages of opioid users are 21 to 34. We also saw a correlation between opioid users and a higher number of arrests, specifically as we leaned towards poorer income brackets.
 
 We then went on to do more complex analysis by comparing variables across different frequencies of opioid use. To be consistent with many previous opioid investigations, we defined frequent users as those with 100 or more days of nonmedical opioid use in the past year and highly frequent users as those with 200 or more days of nonmedical use. We saw positive correlations between increased frequency of opioid use and increased arrest rate as well as increased frequency of opioid use and increased anxiety / depression.
 
-Lastly, we scrutinized youth opioid users and potential reasons for their abuse. We unfortunately did not see any clear relationship between youth participation in activities and opioid use, so we instead decided to explore whether opioid use is tied to other drugs as well. This inspired our interactive component in which we allow our audience to personally examine opioids' relationship with other drugs, within both youth and adult users. 
+Lastly, we scrutinized youth opioid users and potential reasons for their abuse. We unfortunately did not see any clear relationship between youth participation in activities and opioid use, so we instead decided to explore whether opioid use is tied to other drugs as well. This inspired our interactive component in which we allow our audience to personally examine opioids' relationship with other drugs, among both youth and overall users. 
 
-Depsite finding many captivating patterns in the dataset, we still recognize a major limitation with the survey data is how accurately it captures opioid misuse, most notably with the term "misuse" itself. In the American Journal of Drug and Alcohol Abuse, Joseph Palamar wrote an [article](https://www.tandfonline.com/doi/full/10.1080/00952990.2018.1521826) on this specific subject that helped deepen our subject knowledge and awareness. It targets various problems with the survey such as terminology, definition, and the lacking granularity of the term "opioid." Our greatest takeaway is that opioid misuse can never be studied accurately and that we must be okay with indefinite analysis, but improving question terminology and specifity on these surveys can at least help our investigation.
+Depsite finding many captivating patterns in the dataset, we still recognize a major limitation with the survey data is how accurately it captures opioid misuse, most notably with the term "misuse" itself. In the American Journal of Drug and Alcohol Abuse, Joseph Palamar wrote an [article](https://www.tandfonline.com/doi/full/10.1080/00952990.2018.1521826) on this specific subject that helped deepen our subject knowledge and awareness. It targets various problems with the survey such as terminology, definition, and the lacking granularity of the term "opioid." Our greatest takeaway is that opioid misuse can never be studied completely accurately and that we must be okay with indefinite analysis, but improving question terminology and specifity on these surveys can at least help our investigation.
 
-Another shortcoming we noted about our project was that we only have cross-sectional data as opposed to longitudinal data. We have information about users at this very specific moment in time (2013), but this survey has little to no clarity about past patterns and future patterns. Nonetheless, the NSDUH survey has been conducted numerous times between 1979 and 2014. Therefore, there is potential to build some kind of longitudinal analysis of how opioid use rates and patterns have changed over time.  Unfortunately, however, individual users cannot be tracked over time, so it's hard to see how people change or how different variables can affect use rates at different times. 
+Another shortcoming we noted about our project was that we only have cross-sectional data as opposed to longitudinal data. We have information about users at this very specific moment in time (2013), but this survey has little to no clarity about past patterns and future patterns. Nonetheless, the NSDUH survey has been conducted numerous times between 1979 and 2014. Therefore, there is potential to build some kind of longitudinal analysis of how opioid use rates and patterns have changed over time.  Unfortunately, however, individual users cannot be tracked over time, so it's hard to see how people change or how different variables can affect use rates at different times. For this reason, we were not able to attempt any sort of causal analysis and focused on correlations. This worked well for the purposes of our exploratory analysis, though an additional study looking at use over time would be interesting.
 
 As we worked on our own project, we found many relevant and interconnected articles. Considering how pop culture and "hype" could be factors in youth opioid use, we were particularly interested in this [analysis](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6371364/) of opioid use in relation to social media. We were also shocked by the figure stated in the introduction of $78.5 billion a year being spent on opioid use, so this drugabuse.gov [page](https://www.drugabuse.gov/publications/research-reports/medications-to-treat-opioid-addiction/how-much-does-opioid-treatment-cost) proved riveting.
 
-We still have many lingering questions and insights we would like to obtain regarding opioid use. For example, what are the most common sources of obtaining opioids if not from a medical prescription? What factors contribute most to whether an individual uses a prescription painkiller non-medically? How do we define boundaries between use, misuse, abuse, and addiction? Opioid use is a truly infinite and multi-faceted topic that can be researched in great depth. We have barely broken the ice on the endless research that can be done, and we now feel particularly motivated to stay up-to-date with the opioid epidemic and continue our investigation whenever possible.
+We still have many lingering questions and insights we would like to obtain regarding opioid use. For example, what are the most common sources of obtaining opioids if not from a medical prescription? What factors contribute most to whether an individual uses a prescription painkiller nonmedically? How do we define boundaries between use, misuse, abuse, and addiction? Opioid use is a truly infinite and multi-faceted topic that can be researched in great depth. We have barely broken the ice on the endless research that can be done, and we now feel particularly motivated to stay up-to-date with the opioid epidemic and continue our investigation when possible.
