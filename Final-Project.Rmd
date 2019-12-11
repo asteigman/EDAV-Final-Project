@@ -115,10 +115,13 @@ nrow(opioid_users)/nrow(drug_study)*100
 Now, we consider respondents' incomes within our sample. Looking at all of our respondents, about 30% of users make <$20,000 per year, 35% between $20,000 and $49,999, 15% between $50,000 and $74,999, and 20% above $75,000 per year. We wanted to add another dimension to this and get more insight on whether certain combinations of groups, also considering gender, were using prescription painkillers. To see how our drug users vary with regard to income and sex, we created the plot below. This plot only includes opioid users, making it easy to see the breakdown. 
 
 ```{r}
+colorblind_palette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
 ggplot(data = opioid_users) +
    geom_mosaic(aes(x = product(Income, Sex), fill=Income), na.rm=TRUE, show.legend = FALSE) +
    labs(x="Sex", y="Income", title='Sex and Income of Opioid Users')  +
-  theme_grey(14)
+  theme_grey(14) +
+  scale_fill_manual(values=c("#56B4E9",  "#CC79A7", "#009E73", "#D55E00"))
 ```
 
 Above, we can see that nearly identical proportions of females and males have used prescription painkillers non-medically (slightly more males than females). However, we do see some differences of use within gender when we vary income level. For both genders, we see that the highest proportion of users has an income of between $20,000 and $49,000. For females, usage drops off a bit after that (the majority of female users tend to be more poor). On the other hand, our male respondents with the highest income made up a larger portion of male users as compared to the female proportions. However, for both groups the smallest proportion of opioid users are in the income bracket of $50,000 - $74,999, which is somewhat of an anomaly since it seems more reasonable that either the richest or poorest income groups would be abusing opioids the most, either due to more life struggles or due to more money to spend.  
@@ -129,7 +132,7 @@ The above graph only considers whether a respondent has used a prescription pain
 
 ```{r, warning=FALSE, fig.height=4, fig.width=10}
 ggplot(data = opioid_users, mapping = aes(ANLYRTOT)) + 
-  geom_histogram(binwidth = 10, boundary=-0.5, fill="#663399") + 
+  geom_histogram(binwidth = 10, boundary=-0.5, fill="#0072B2") + 
   labs(title = "Total Days Using Non-Medical Pain Reliever in Past Year", x = "Number of Days", y = "Count") + 
   scale_x_continuous(breaks=seq(0,365,10))  +
   theme_grey(11) 
@@ -147,7 +150,8 @@ ggplot(opioid_users[!is.na(opioid_users$frequency),], aes(fct_rev(Income))) +
         fill='Frequency of Use') + 
   guides(fill = guide_legend(reverse = TRUE)) +
   coord_flip()  +
-  theme_grey(14)
+  theme_grey(14) +
+  scale_fill_manual(values=c("#F0E442", "#56B4E9", "#D55E00"))
 ```
 It is important to note that in the above graph, we only look at the subset of opioid users who recorded their frequency of opioid use. Across all income groups, we see relatively similar ratios. The greatest proportions of frequent and highly frequent users is in the income bracket of under $20,000 per year. The second highest percentages are in the income group of between $20,000 and $49,999 anually. Overall though, the breakdown does not deviate much from the frequency of use not accounting for income. This is interesting because it provides evidence for the argument that income may not be a barrier to getting the drug for recreational (frequent or highly frequent, versus infrequent which is less likely to be, but still can be, recreational) use.  
 # I THINK SOMEWHERE ABOVE WE IMPLY THAT INFREQUENT USE IS MORE LIKELY TO BE RECREATIONAL THAN FREQ / HIGHLY FREQ USE? THIS CONTRACTS THAT ? CHECK CHECK CHECK
@@ -165,14 +169,16 @@ users_plot <- ggplot(opioid_users[!is.na(opioid_users$Booked),]) +
   labs(fill = "Arrested", y = "Proportion of Arrests",x="Income",title="Proportion of Arrests by Income for Opioid Users") +
   geom_bar(position = "fill", show.legend = FALSE) + 
   theme(plot.title = element_text(hjust = 0.5)) +
-  theme_grey(13)
+  theme_grey(13) + 
+  scale_fill_manual(values=c("#E69F00", "#56B4E9"))
 
 nonusers_plot <- ggplot(non_users[!is.na(non_users$Booked),]) +
   aes(x = Income, fill = Booked) +
   labs(fill = "Arrested",x="Income",y="",title="Proportion of Arrests by Income for Non-Users") +
   geom_bar(position = "fill") + 
   theme(plot.title = element_text(hjust = 0.5))  +
-  theme_grey(13)
+  theme_grey(13) + 
+  scale_fill_manual(values=c("#E69F00", "#56B4E9"))
 
 grid.arrange(users_plot, nonusers_plot, ncol=2)
 ```
@@ -181,10 +187,11 @@ Overall, just about one third of opioid users have been arrested and booked for 
 
 ```{r, fig.width=10}
 p = ggplot(data = opioid_users[!is.na(opioid_users$Booked) & !is.na(opioid_users$frequency),], mapping = aes(Booked)) + 
-  geom_bar(aes(y = ..prop.., group = 1), fill = c("#F8766D", "#00BFC4", "#F8766D", "#00BFC4", "#F8766D", "#00BFC4")) + 
+  geom_bar(aes(y = ..prop.., group = 1), fill = c("#E69F00", "#56B4E9", "#E69F00", "#56B4E9", "#E69F00", "#56B4E9")) + 
   facet_wrap(~frequency) +
   labs(title = "Ever Been Arrested and Booked for Breaking Law", x = "Been Booked", y = "Proportion") + 
-  theme_grey(14)
+  theme_grey(14) 
+  
 show(p)
 
 # DOES THIS NEED A LEGEND? I JUST COLOR CODED TO BE AESTHETIC
@@ -200,24 +207,24 @@ A great deal of opioid abusers claim that they use opioids to self-medicate - fo
 opioid_users$Anxiety <- factor(opioid_users$Anxiety, levels = c("no", "yes"))
 
 p1 <- ggplot(non_users[!is.na(non_users$Anxiety),], mapping = aes(Anxiety)) +
-  geom_bar(aes(y = ..prop.., group = 1), fill = c("#F8766D", "#00BFC4")) +
+  geom_bar(aes(y = ..prop.., group = 1), fill = c("#E69F00", "#56B4E9")) +
   labs(title = "Non-Opioid Users' Anxiety Rates", x = "Has Anxiety", y = "Proportion") + 
-  theme_grey(14)
+  theme_grey(14) 
 
 p2 <- ggplot(opioid_users[!is.na(opioid_users$Anxiety),], mapping = aes(Anxiety)) +
-  geom_bar(aes(y = ..prop.., group = 1), fill = c("#F8766D", "#00BFC4")) +
+  geom_bar(aes(y = ..prop.., group = 1), fill = c("#E69F00", "#56B4E9")) +
   labs(title = "Opioid Users' Anxiety Rates", x = "Has Anxiety", y = "Proportion") + 
-  theme_grey(14)
+  theme_grey(14) 
 
 p3 <- ggplot(non_users[!is.na(non_users$Depression),], mapping = aes(Depression)) +
-  geom_bar(aes(y = ..prop.., group = 1), fill = c("#F8766D", "#00BFC4")) +
+  geom_bar(aes(y = ..prop.., group = 1), fill = c("#E69F00", "#56B4E9")) +
   labs(title = "Non-Opioid Users' Depression Rates", x = "Has Depression", y = "") + 
-  theme_grey(14)
+  theme_grey(14) 
 
 p4 <- ggplot(opioid_users[!is.na(opioid_users$Depression),], mapping = aes(Depression)) +
-  geom_bar(aes(y = ..prop.., group = 1), fill = c("#F8766D", "#00BFC4")) +
+  geom_bar(aes(y = ..prop.., group = 1), fill = c("#E69F00", "#56B4E9")) +
   labs(title = "Opioid Users' Depression Rates", x = "Has Depression", y = "") + 
-  theme_grey(14)
+  theme_grey(14) 
 
 grid.arrange(p1, p2, p3, p4, nrow=2, ncol=2)
 
@@ -246,13 +253,15 @@ levels(opioid_users$frequency) <- gsub(" ", "\n", levels(opioid_users$frequency)
 
 p1 <-  ggplot(data = opioid_users[!is.na(opioid_users$frequency),]) +
    geom_mosaic(aes(x = product(Anxiety, frequency), fill=Anxiety), na.rm=TRUE, show.legend = FALSE) +
-   labs(x="Frequency of Opioid Use", y="Has Anxiety", title='Frequency of Use Breakdown for Opioid Users with Anxiety') + 
-  theme_grey(11)
+   labs(x="Frequency of Opioid Use", y="Has Anxiety", title='Frequency of Use Breakdown for Opioid Users with Anxiety') +
+   theme_grey(11) + 
+  scale_fill_manual(values=c("#E69F00", "#56B4E9"))
 
 p2 <-  ggplot(data = opioid_users[!is.na(opioid_users$frequency),]) +
    geom_mosaic(aes(x = product(Depression, frequency), fill=Depression), na.rm=TRUE, show.legend = FALSE) +
    labs(x="Frequency of Opioid Use", y="Has Depression", title='Frequency of Use Breakdown for Opioid Users with Depression') + 
-   theme_grey(11)
+   theme_grey(11) + 
+  scale_fill_manual(values=c("#E69F00", "#56B4E9"))
 
 grid.arrange(p1, p2, ncol=2)
 ```
@@ -267,7 +276,8 @@ opioid_users$Anxiety <- factor(opioid_users$Anxiety, levels = c("yes", "no"))
 a1 <-  ggplot(data = opioid_users) +
    geom_mosaic(aes(x = product(Anxiety, Age), fill=Anxiety), na.rm=TRUE, show.legend = FALSE) +
    labs(x="Age", y="Has Anxiety", title='Age Breakdown of Opioid Users with Anxiety') +
-   theme_grey(13)
+   theme_grey(13) + 
+   scale_fill_manual(values=c("#E69F00", "#56B4E9"))
 show(a1)
 ```
 Now, we investigate anxiety rates in opioid users broken down by age groups. We looked at a plot of anxiety rates in non users split by age as well, but it provided nearly the same insights as this graph, so we elected not to include it. The graph clearly displays a general trend of increasing likelihood of anxiety with age, meaning the youngest opioid users have the lowest proportion of anxiety while the oldest opioid users have the highest. The Anxiety and Depression Associate of America reaffirms these results by providing statistics that one in eight (12.5%) [children](https://adaa.org/living-with-anxiety/children) are affected by anxiety disorders where as 18.1% of the [adult](https://adaa.org/about-adaa/press-room/facts-statistics) population in the US are prone to anxiety disorders. This leads to the takeaway that youth opioid misuse is perhaps less tied to anxiety and depression than adult misuse. As a result, there must be different causes for youth misuse such as social environment, extracurriculars, peer pressure, and more, which we now go on to explore in the next section.
@@ -286,7 +296,8 @@ ggplot(drug_study, aes(fct_rev(Age))) +
   coord_flip() + 
   theme(plot.title = element_text(hjust = 0.5)) + 
   theme_grey(14) + 
-  guides(fill = guide_legend(reverse = TRUE))
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  scale_fill_manual(values=c("#E69F00", "#56B4E9"))
 ```
 
 We can see that as age increases, a user is more likely to have used a prescription painkiller non-medically, but this levels off at the ages of 21-34 and even decreases for the oldest group. It is obvious and intuitive that there would be a larger proportion of people who have tried opioids as age increases because they have had longer to try these drugs, and it is more rare to try a "harder" drug (substances like opioids and stimulants as opposed to marijuana and alcohol) at a younger age. What is more interesting, though for this chart, is the older demographic: if an individual has not tried taking a prescription painkiller non-medically by their early 20's, they are perhaps less likely to ever try them as they get older. Additionally, the fact that the oldest population is the least likely to have used opioids non-medically suggets that opioid misuse has become a more popular issue in the United States. It implies that perhaps there is some level of youth "hype" over the drug that leads to higher use in these age groups. 
@@ -308,7 +319,8 @@ ggplot(tidy_act_yth, aes(Opioid)) +
         y="Proportion",
         fill='Participated') +
   theme(plot.title = element_text(hjust = 0.5)) + 
-  theme_grey(14)
+  theme_grey(14) + 
+  scale_fill_manual(values=c("#E69F00", "#56B4E9"))
 
 ```
 
