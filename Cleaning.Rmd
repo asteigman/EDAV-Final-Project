@@ -27,7 +27,7 @@ drug_study <- da35509.0001
 # Begin cleaning 
 
 # Select out columns we need
-relevant_cols <- c('ANLEVER', 'IRSEX', 'INCOME', 'ANLYRTOT', 'BOOKED', 'CATAG7', 'YESCHACT', 'YECOMACT', 'YEFAIACT', 'YEOTHACT', 'ANXDYR', 'DEPRSYR', 'SLPAPYR', 'MJEVER', 'STMEVER')
+relevant_cols <- c('ANLEVER', 'IRSEX', 'INCOME', 'ANLYRTOT', 'BOOKED', 'CATAG7', 'YESCHACT', 'YECOMACT', 'YEFAIACT', 'YEOTHACT', 'ANXDYR', 'DEPRSYR', 'HALFLAG', 'MJEVER', 'STMEVER')
 drug_study <- drug_study[,colnames(drug_study) %in% relevant_cols]
 
 # Sex variable
@@ -77,9 +77,6 @@ drug_study$Anxiety <- as.factor(drug_study$Anxiety)
 
 drug_study$Depression <- ifelse(drug_study$DEPRSYR=="(0) No (YRDEPRS=6,89,99)","no","yes")
 drug_study$Depression <- as.factor(drug_study$Depression)
-
-drug_study$SleepApnea <- ifelse(drug_study$SLPAPYR=="(0) No (YRSLPAP=6,89,99)","no","yes")
-drug_study$SleepApnea <- as.factor(drug_study$SleepApnea)
 
 write.csv(drug_study, 'cleaned_drug_study.csv')
 ```
