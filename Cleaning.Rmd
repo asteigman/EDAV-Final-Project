@@ -73,11 +73,14 @@ drug_study$Stimulant <- as.factor(drug_study$Stimulant)
 
 # Illness variables
 drug_study$Anxiety <- ifelse(drug_study$ANXDYR=="(0) No (YRANXD=6,89,99)","no","yes")
+drug_study$Anxiety[is.na(drug_study$Anxiety)] <- "no"  # assume people who didn't respond to Anxiety don't have it
 drug_study$Anxiety <- as.factor(drug_study$Anxiety)
 
 drug_study$Depression <- ifelse(drug_study$DEPRSYR=="(0) No (YRDEPRS=6,89,99)","no","yes")
+drug_study$Anxiety[is.na(drug_study$Depression)] <- "no"  # assume people who didn't respond to Depression don't have it
 drug_study$Depression <- as.factor(drug_study$Depression)
 
 write.csv(drug_study, 'cleaned_drug_study.csv')
 ```
+
 
