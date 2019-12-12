@@ -20,7 +20,7 @@ library(ggmosaic)
 library(mi)
 library(dplyr)
 library(plyr)
-#library(extracat)
+library(extracat)
 ```
 
 ## I. Introduction
@@ -95,8 +95,8 @@ The plot below shows missing values for our entire sample.
 
 ```{r, warning=FALSE, message=FALSE}
 # Display missing data patterns across rows and columns
-# drug_study_missing <- select(drug_study,MJEVER,ANLEVER,ANLYRTOT,STMEVER,BOOKED,ANXDYR,DEPRSYR,INCOME,IRSEX,CATAG7,HALFLAG)
-# visna(drug_study_missing,sort="b")
+drug_study_missing <- select(drug_study,MJEVER,ANLEVER,ANLYRTOT,STMEVER,BOOKED,ANXDYR,DEPRSYR,INCOME,IRSEX,CATAG7,HALFLAG)
+visna(drug_study_missing,sort="b")
 ```
 
 First, we see that some variables have no missing values: INCOME, IRSEX, CATAG7, and HALFLAG. This is to be expected: these variables were imputed. For income, sex, and age, this is useful since we want to have as much demographic information as possible. For HALFLAG, which tells us whether or not a respondent has used a hallucinogen, it would have been preferable to work with or at least compare to the raw data, but for some reason, it was not included in the dataset. After that, we see that most of the data appears to be missing for ANLYRTOT, STMEVER, and ANLEVER - these are three variables related to drug usage, and are, respectively, the number of days an individual has used an opioid non-medically in the past year, whether or not an individual has used a stimulant nomedically, and whether or not an individual has used an opioid non-medically. When we look at how these variables were coded, the latter two only received a value if an individual responded "yes," so we recoded the NA's to "no" and had no missing data for these variables in our cleaned version. Interestingly, MJEVER (whether or not an individual has used marijuana) was not coded this way but rather no's were coded directly, and only a very small proportion of responses were missing. 
@@ -325,7 +325,7 @@ ggplot(tidy_act_yth, aes(Opioid)) +
   theme_grey(14) + 
   scale_fill_manual(values=c("#0072B2", "#CC79A7"))
 ```
-# jo thought the no yes on bottom and on right was confusing. maybe we change legend labels to "did not participate" and "participated" ?
+
 We can see that overall, there is not much difference between participation in each activity based on opioid usage - while those youth who have never tried an opioid non-medically have slightly higher participation, it is never by more than 5%. Regardless of opioid usage, the highest proportion of youth participates in activities at school, then community activities, followed by faith-based activities, and finally other activities. The overall lack of difference between opioid users and non-users in participation rates goes against what we would expect, which leads us to ask: if being more engaged is not a way to prevent opioid usage in teens, what is?
 
 In order to investigate youth opioid usage from a new angle, we now look into whether people who use or have tried other drugs are more likely to try prescription painkillers non-medically. We make this component interactive so that people can probe the various populations and drugs that are of most interest to them.
