@@ -20,7 +20,7 @@ library(ggmosaic)
 library(mi)
 library(dplyr)
 library(plyr)
-#library(extracat)
+library(extracat)
 ```
 
 ## I. Introduction
@@ -95,8 +95,8 @@ The plot below shows missing values for our entire sample.
 
 ```{r, warning=FALSE, message=FALSE}
 # Display missing data patterns across rows and columns
-#drug_study_missing_adult <- select(drug_study,MJEVER,ANLEVER,ANLYRTOT,STMEVER,BOOKED,ANXDYR,DEPRSYR,INCOME,IRSEX,CATAG7,HALFLAG)
-#visna(drug_study_missing_adult,sort="b")
+drug_study_missing_adult <- select(drug_study,MJEVER,ANLEVER,ANLYRTOT,STMEVER,BOOKED,ANXDYR,DEPRSYR,INCOME,IRSEX,CATAG7,HALFLAG)
+visna(drug_study_missing_adult,sort="b")
 ```
 
 First, we see that some variables have no missing values: INCOME, IRSEX, CATAG7, and HALFLAG. This is to be expected: these variables were imputed. For income, sex, and age, this is useful since we want to have as much demographic information as possible. For HALFLAG, which tells us whether or not a respondent has used a hallucinogen, it would have been preferable to work with or at least compare to the raw data, but for some reason, it was not included in the dataset. After that, we see that most of the data appears to be missing for ANLYRTOT, STMEVER, and ANLEVER - these are three variables related to drug usage, and are, respectively, the number of days an individual has used an opioid nonmedically in the past year, whether or not an individual has used a stimulant nomedically, and whether or not an individual has used an opioid nonmedically. When we look at how these variables were coded, the latter two only received a value if an individual responded "yes," so we recoded the NA's to "no" and had no missing data for these variables in our cleaned version. Interestingly, MJEVER (whether or not an individual has used marijuana) was not coded this way but rather no's were coded directly, and only a very small proportion of responses were missing. 
