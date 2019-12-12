@@ -55,7 +55,7 @@ We imported our data as a .rda file, which added a new challenge because loading
 
 ```{r}
 # Read in data that has been cleaned with our cleaning script
-drug_study <- read.csv(file="cleaned_drug_study.csv", header=TRUE, sep=",") 
+drug_study <- read.csv(file="../data/clean/cleaned_drug_study.csv", header=TRUE, sep=",") 
 
 # People who have taken opioids non-medically
 opioid_users <- drug_study[drug_study$Opioid=="yes",]

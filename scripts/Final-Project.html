@@ -466,7 +466,7 @@ summary {
 <h2>III. Data Transformation</h2>
 <p>We imported our data as a .rda file, which added a new challenge because loading and accessing the data was different than with the previous file types we have worked with. It was not extremely difficult though, and once the data was loaded in, we were able to deal with it as a typical dataframe object. We proceeded to do all our cleaning on this data in the cleaning script and saved the cleaned data to a csv file, which we will now import here. The majority of variables we used in our analyses were categorical, so for visualization purposes, we converted relevant variables to factors. Based on the specific question we were answering, sometimes we included all ~55000 rows of the dataset, and other times we included only the opioid users. For questions regarding youth, we used the age variable (CATAG7) to subset our data. Additionally, the raw data for one of the graphs in our youth section asks about the number of activities youth have participated in (for various types of activities, such as community-based). We recode this variable, which has the options of none, one, two, and three or more to be binary (“no” if the respondent selected “none” and “yes” otherwise).</p>
 <pre class="r"><code># Read in data that has been cleaned with our cleaning script
-drug_study &lt;- read.csv(file=&quot;cleaned_drug_study.csv&quot;, header=TRUE, sep=&quot;,&quot;) 
+drug_study &lt;- read.csv(file=&quot;../data/clean/cleaned_drug_study.csv&quot;, header=TRUE, sep=&quot;,&quot;) 
 
 # People who have taken opioids non-medically
 opioid_users &lt;- drug_study[drug_study$Opioid==&quot;yes&quot;,]
