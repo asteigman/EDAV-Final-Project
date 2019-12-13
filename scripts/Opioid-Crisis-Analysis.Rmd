@@ -1,10 +1,8 @@
 ---
 title: "Exploring Prescription Painkiller Use and Abuse"
-author: "Suman Tripathy, Amanda Steigman"
+author: "Suman Tripathy and Amanda Steigman"
 date: "11/23/2019"
-output: 
-  html_document:
-    code_folding: hide
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -55,7 +53,7 @@ We imported our data as a .rda file, which added a new challenge because loading
 
 ```{r}
 # Read in data that has been cleaned with our cleaning script
-drug_study <- read.csv(file="../data/clean/cleaned_drug_study.csv", header=TRUE, sep=",") 
+drug_study <- read.csv(file="../data/clean/cleaned_drug_study.csv", header=TRUE, sep=",")
 
 # People who have taken opioids non-medically
 opioid_users <- drug_study[drug_study$Opioid=="yes",]
@@ -253,13 +251,13 @@ p1 <-  ggplot(data = opioid_users[!is.na(opioid_users$frequency),]) +
    geom_mosaic(aes(x = product(Anxiety, frequency), fill=Anxiety), na.rm=TRUE, show.legend = FALSE) +
    labs(x="Frequency of Opioid Use", y="Has Anxiety", title='Frequency of Use Breakdown for Opioid Users with Anxiety') +
    theme_grey(10) + 
-  scale_fill_manual(values=c("#0072B2", "#CC79A7")) + theme(plot.title = element_text(hjust = 0.5))
+  scale_fill_manual(values=c("#CC79A7", "#0072B2")) + theme(plot.title = element_text(hjust = 0.5))
 
 p2 <-  ggplot(data = opioid_users[!is.na(opioid_users$frequency),]) +
    geom_mosaic(aes(x = product(Depression, frequency), fill=Depression), na.rm=TRUE, show.legend = FALSE) +
    labs(x="Frequency of Opioid Use", y="Has Depression", title='Frequency of Use Breakdown for Opioid Users with Depression') + 
    theme_grey(10) + 
-  scale_fill_manual(values=c("#0072B2", "#CC79A7")) + theme(plot.title = element_text(hjust = 0.5))
+  scale_fill_manual(values=c("#CC79A7", "#0072B2")) + theme(plot.title = element_text(hjust = 0.5))
 
 grid.arrange(p1, p2, ncol=2)
 ```
@@ -277,7 +275,7 @@ ggplot(data = opioid_users) +
    geom_mosaic(aes(x = product(Anxiety, Age), fill=Anxiety), na.rm=TRUE, show.legend = FALSE) +
    labs(x="Age", y="Has Anxiety", title='Age Breakdown of Opioid Users with Anxiety') +
    theme_grey(13) + 
-   scale_fill_manual(values=c("#0072B2", "#CC79A7")) + theme(plot.title = element_text(hjust = 0.5))
+   scale_fill_manual(values=c("#CC79A7", "#0072B2")) + theme(plot.title = element_text(hjust = 0.5))
 ```
 Here, we investigate anxiety rates in opioid users broken down by age groups. We looked at a plot of anxiety rates in non-users split by age as well, but it did not provide any additional insight, so we elected not to include it. The graph clearly displays a general trend of increasing likelihood of anxiety with age, meaning the youngest opioid users have the lowest proportion of anxiety while the oldest opioid users have the highest. The Anxiety and Depression Association of America reaffirms these results by providing statistics that one in eight (12.5%) [children](https://adaa.org/living-with-anxiety/children) are affected by anxiety disorders whereas 18.1% of the [adult](https://adaa.org/about-adaa/press-room/facts-statistics) population in the US are prone to anxiety disorders. This leads to the implication that youth opioid misuse is perhaps less tied to anxiety and depression than adult misuse. There must be different causes for youth misuse such as social environment, extracurriculars, and experimentation, which we go on to explore in the next section.
 
