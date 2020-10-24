@@ -2,7 +2,7 @@
 title: "Exploring Prescription Painkiller Use and Abuse"
 author: "Suman Tripathy and Amanda Steigman"
 date: "11/23/2019"
-output: rmarkdown::github_document
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
